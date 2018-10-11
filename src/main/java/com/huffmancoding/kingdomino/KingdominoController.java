@@ -28,31 +28,35 @@ public class KingdominoController
     {
         Map<String, Object> tabletop = new TreeMap<>();
         tabletop.put("kingdoms", game.getAllKingdoms());
-        tabletop.put("thisRoundTiles", toJsonFriendly(game.getThisRoundTiles()));
-        tabletop.put("nextRoundTiles", toJsonFriendly(game.getNextRoundTiles()));
+        addRoundTiles(tabletop, "thisRoundTiles", game.getThisRoundTiles());
+        addRoundTiles(tabletop, "nextRoundTiles", game.getNextRoundTiles());
         tabletop.put("currentTurn", game.getCurrentTurn());
         return ResponseEntity.ok(tabletop);
     }
 
-    private List<Map<String, Object>> toJsonFriendly(StagedTiles stagedTiles)
+    private void addRoundTiles(Map<String, Object> tabletop,
+        String key, StagedTiles stagedTiles)
     {
-        List<Map<String, Object>> list = new ArrayList<>();
-
-        for (Entry<Tile, Player> entry : stagedTiles.getUnplacedTiles().entrySet())
+        if (stagedTiles != null)
         {
-            Map<String, Object> map = new TreeMap<>();
+            List<Map<String, Object>> list = new ArrayList<>();
 
-            map.put("tile", entry.getKey());
-            Player player = entry.getValue();
-            if (player != null)
+            for (Entry<Tile, Player> entry : stagedTiles.getUnplacedTiles().entrySet())
             {
-                map.put("player", player);
+                Map<String, Object> map = new TreeMap<>();
+
+                map.put("tile", entry.getKey());
+                Player player = entry.getValue();
+                if (player != null)
+                {
+                    map.put("player", player);
+                }
+
+                list.add(map);
             }
 
-            list.add(map);
+            tabletop.put(key, list);
         }
-
-        return list;
     }
 
     @PostMapping("/claimtile")

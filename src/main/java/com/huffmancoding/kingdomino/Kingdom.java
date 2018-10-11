@@ -61,10 +61,9 @@ public class Kingdom
     private void addSquareToProperty(List<KingdomProperty> properties, Location location)
     {
         Square square = getSquare(location);
-        Optional<Landscape> landscape = square.getLandscape();
-        if (! landscape.isPresent())
+        if (square == null || ! square.getLandscape().isPresent())
         {
-            // castles aren't part of properties
+            // empty squares and castles aren't part of properties
             return;
         }
 
