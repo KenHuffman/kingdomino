@@ -2,11 +2,7 @@ package com.huffmancoding.kingdomino;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.huffmancoding.kingdomino.CurrentTurn.Task;
@@ -79,9 +75,14 @@ public class Game
         return nextRoundTiles;
     }
 
-    public void claimTile(int rank) throws IllegalMoveException
+    public void claimTile(String playerName, int rank) throws IllegalMoveException
     {
         Player player = currentTurn.getPlayer();
+        if (! player.getName().equals(playerName))
+        {
+            throw new IllegalMoveException("It is not player " + playerName + " turn.");
+        }
+
         switch (currentTurn.getTask())
         {
             case CHOOSING_INITIAL_TILE:
@@ -112,12 +113,7 @@ public class Game
 
     private CurrentTurn getNextPlayerForInitialSelect()
     {
-        Set<Player> playersWithTiles =
-            thisRoundTiles.getUnplacedTiles().entrySet()
-            .stream()
-            .map(Map.Entry::getValue)
-            .filter(p -> p != null)
-            .collect(Collectors.toSet());
+        Set<Player> playersWithTiles = thisRoundTiles.getPlayersWithTiles();
 
         for (Kingdom kingdom : kingdoms)
         {
@@ -131,17 +127,21 @@ public class Game
         return null;
     }
 
-    public void placeTile(Location location0, Location location1)
+    public void placeTile(String playerName, Location location0, Location location1)
         throws IllegalMoveException
     {
+        Player player = currentTurn.getPlayer();
+        if (! player.getName().equals(playerName))
+        {
+            throw new IllegalMoveException("It is not player " + playerName + " turn.");
+        }
+
         if (currentTurn.getTask() != Task.PLACING_TILE)
         {
             throw new IllegalMoveException("It is not time to place a tile");
         }
 
-        SortedMap<Tile, Player> unplacedTiles = thisRoundTiles.getUnplacedTiles();
-        Tile tile = unplacedTiles.firstKey();
-        Player player = unplacedTiles.remove(tile);
+        Tile tile = thisRoundTiles.removeNextTile(playerName);
         Kingdom kingdom = getKingdom(player);
 
         kingdom.placeTile(tile, location0, location1);

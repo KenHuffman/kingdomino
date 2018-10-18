@@ -1,6 +1,9 @@
 package com.huffmancoding.kingdomino;
 
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -36,6 +39,15 @@ public class StagedTiles
         return rankedTiles;
     }
 
+    public Set<Player> getPlayersWithTiles()
+    {
+        return rankedTiles.entrySet()
+            .stream()
+            .map(Map.Entry::getValue)
+            .filter(p -> p != null)
+            .collect(Collectors.toSet());
+    }
+
     public Player getNextPlacingPlayer()
     {
         if (rankedTiles.isEmpty())
@@ -44,5 +56,20 @@ public class StagedTiles
         }
 
         return rankedTiles.values().iterator().next();
+    }
+
+    public Tile removeNextTile(String playerName) throws IllegalMoveException
+    {
+        Player player = getNextPlacingPlayer();
+        if (player == null || ! player.getName().equals(playerName))
+        {
+            throw new IllegalMoveException("Player " + playerName +
+                " is not the next to place a tile.");
+        }
+
+        Tile tile = rankedTiles.firstKey();
+        rankedTiles.remove(tile);
+
+        return tile;
     }
 }

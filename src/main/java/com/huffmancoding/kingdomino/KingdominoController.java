@@ -20,21 +20,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class KingdominoController
 {
+    /** the game to report on. */
     @Resource(name = "game")
     Game game;
 
+    /**
+     * Return the state of the game in one big json blob
+     *
+     * @return the game
+     */
     @GetMapping("/getgame")
-    public ResponseEntity<?> getTabletop()
+    public ResponseEntity<?> getGame()
     {
-        Map<String, Object> tabletop = new TreeMap<>();
-        tabletop.put("kingdoms", game.getAllKingdoms());
-        addRoundTiles(tabletop, "thisRoundTiles", game.getThisRoundTiles());
-        addRoundTiles(tabletop, "nextRoundTiles", game.getNextRoundTiles());
-        tabletop.put("currentTurn", game.getCurrentTurn());
-        return ResponseEntity.ok(tabletop);
+        Map<String, Object> gameMap = new TreeMap<>();
+        gameMap.put("kingdoms", game.getAllKingdoms());
+        addRoundTiles(gameMap, "thisRoundTiles", game.getThisRoundTiles());
+        addRoundTiles(gameMap, "nextRoundTiles", game.getNextRoundTiles());
+        gameMap.put("currentTurn", game.getCurrentTurn());
+        return ResponseEntity.ok(gameMap);
     }
 
-    private void addRoundTiles(Map<String, Object> tabletop,
+    /**
+     * Convert the unplaced tiles of a staged collection into a game map.
+     *
+     * @param gameMap the map to add the list of tiles to
+     * @param key the key for the list to be added
+     * @param stagedTiles the tiles to convert to a list of maps
+     */
+    private void addRoundTiles(Map<String, Object> gameMap,
         String key, StagedTiles stagedTiles)
     {
         if (stagedTiles != null)
@@ -55,17 +68,24 @@ public class KingdominoController
                 list.add(map);
             }
 
-            tabletop.put(key, list);
+            gameMap.put(key, list);
         }
     }
 
+    /**
+     * Have the current player claim a tile for placing later.
+     *
+     * @param rank
+     * @return
+     */
     @PostMapping("/claimtile")
     public ResponseEntity<?> handleClaimTile(
+        @RequestParam("playerName") String playerName,
         @RequestParam("rank") int rank)
     {
         try
         {
-            game.claimTile(rank);
+            game.claimTile(playerName, rank);
             return ResponseEntity.ok(null);
         }
         catch (IllegalMoveException ex)
@@ -76,6 +96,7 @@ public class KingdominoController
 
     @PostMapping("/placetile")
     public ResponseEntity<?> handlePlaceTile(
+        @RequestParam("playerName") String playerName,
         @RequestParam("row0") int row0,
         @RequestParam("column0") int column0,
         @RequestParam("row1") int row1,
@@ -83,7 +104,7 @@ public class KingdominoController
     {
         try
         {
-            game.placeTile(new Location(row0, column0), new Location(row1, column1));
+            game.placeTile(playerName, new Location(row0, column0), new Location(row1, column1));
             return ResponseEntity.ok(null);
         }
         catch (IllegalMoveException ex)
