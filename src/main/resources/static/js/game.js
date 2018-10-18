@@ -7,8 +7,9 @@ function Square(props) {
     // get color of castle
     img = "castle-" + props.playerColorName + ".jpg"
   } else {
-    img = props.square.landscape + ".jpg"
+    img = props.square.landscape + "-" + props.square.crowns + ".jpg"
   }
+  // if props.onClick
   //<button className="square" onClick={props.onClick}>{img}</button>
   return (
     <img src={img}/>
