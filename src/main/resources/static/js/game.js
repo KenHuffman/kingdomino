@@ -1,21 +1,21 @@
 function Square(props) {
   let img;
   if (props.square == null) {
-    img = "empty.jpg";
-  } else if (props.square.landscape == null) {
+    return (<span>empty</span>);
+  }
+  if (props.square.landscape == null) {
     // get color of castle
     img = "castle-" + props.playerColorName + ".jpg"
   } else {
     img = props.square.landscape + ".jpg"
   }
+  //<button className="square" onClick={props.onClick}>{img}</button>
   return (
-    <button className="square" onClick={props.onClick}>
-      {img}
-    </button>
+    <img src={img}/>
   );
 }
 
-class Board extends React.Component {
+class Kingdom extends React.Component {
   renderSquare(row, col, playerColorName) {
     return (
       <Square
@@ -40,6 +40,7 @@ class Board extends React.Component {
 
   render() {
     if (this.props.squares) {
+      // TODO display player name from props
       return (
         <div>
           {this.renderRow(0, this.props.playerColorName)}
@@ -67,7 +68,7 @@ class Game extends React.Component {
   }
 
   componentDidMount() {
-    fetch("gettabletop")
+    fetch("getgame")
       .then(res => res.json())
       .then(
         (result) => {
@@ -96,17 +97,6 @@ class Game extends React.Component {
     }
 
     const playerKingdom = this.currentPlayerKingdom();
-
-    //squares[i] = this.state.xIsNext ? "X" : "O";
-    //this.setState({
-    //  history: history.concat([
-    //    {
-    //      squares: squares
-    //    }
-    //  ]),
-    //  stepNumber: history.length,
-    //  xIsNext: !this.state.xIsNext
-    //});
   }
 
   currentPlayerKingdom()
@@ -150,10 +140,11 @@ class Game extends React.Component {
       playerColorName = null;
     }
 
+    // TODO display currentTurn from state
     return (
       <div className="game">
         <div className="game-board">
-          <Board
+          <Kingdom
             squares={gameSquares}
             playerColorName={playerColorName}
             onClick={(row, col) => this.handleSquareClick(row, col)}
@@ -170,5 +161,5 @@ class Game extends React.Component {
 
 // ========================================
 
-ReactDOM.render(<Game />, document.getElementById("root"));
+ReactDOM.render(<Game />, document.getElementById("game"));
 

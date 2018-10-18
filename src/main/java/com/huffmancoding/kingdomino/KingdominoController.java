@@ -23,7 +23,7 @@ public class KingdominoController
     @Resource(name = "game")
     Game game;
 
-    @GetMapping("/gettabletop")
+    @GetMapping("/getgame")
     public ResponseEntity<?> getTabletop()
     {
         Map<String, Object> tabletop = new TreeMap<>();
