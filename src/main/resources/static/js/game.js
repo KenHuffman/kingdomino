@@ -4,9 +4,15 @@ class Kingdom extends React.Component {
 
     let content;
     if (square == null) {
-      content = (
-        <span className="square">empty</span>
-      );
+      if (this.isEmptySquareClickable(row, col)) {
+        content = (
+          <span className="square" onClick={() => this.handleSquareClick(row, col)}>empty</span>
+        );
+      } else {
+        content = (
+          <span className="square">empty</span>
+        );
+      }
     } else {
       let img;
       if (square.landscape == null) {
@@ -18,17 +24,9 @@ class Kingdom extends React.Component {
       content = (
         <span className="square">{img}</span>
       );
-
-      if (this.props.onClick) {
-        return (
-          <button onClick={this.props.onClick(row, col)}>
-            {content}
-          </button>
-        );
-      } else {
-        return content;
-      }
     }
+
+    return content;
   }
 
   renderRow(row, playerColor) {
@@ -57,7 +55,19 @@ class Kingdom extends React.Component {
       </div>
     );
   }
+
+  isEmptySquareClickable(row, col) {
+    // TODO: check for adjacent to existing tile
+    return this.props.isPlacing;
+  }
+
+  handleSquareClick(row, col) {
+    console.log('Clicked on row=' + row + ', col=' + col);
+  }
 }
+
+// TODO: class Tile extends React.Component {
+// }
 
 class Game extends React.Component {
   constructor(props) {
@@ -91,11 +101,6 @@ class Game extends React.Component {
   }
 
   handleSquareClick(row, col) {
-    const task = this.state.currentTurn.task;
-    if (task == "GAME_OVER") {
-      return;
-    }
-
     const playerKingdom = this.currentPlayerKingdom();
   }
 
@@ -131,21 +136,22 @@ class Game extends React.Component {
 
     const content = this.state.kingdoms.map((kingdom) =>
       <Kingdom
-        squares={kingdom.allSquares}
+        key={kingdom.player.name}
         playerName={kingdom.player.name}
-        playerColor={kingdom.player.color}
+        playerColor={kingdom.player.colorName}
+        isPlacing={currentTurn != null && currentTurn.player.name == kingdom.player.name && currentTurn.task == "PLACING_TILE"}
+        squares={kingdom.allSquares}
         onClick={(row, col) => this.handleSquareClick(row, col)}
       />
     );
 
-    // TODO display currentTurn from state
     return (
       <div className="game">
-        <div className="game-board">
+        <div>
           {content}
         </div>
-        <div className="game-info">
-          <div>{status}</div>
+        <div>
+          {status}
         </div>
       </div>
     );

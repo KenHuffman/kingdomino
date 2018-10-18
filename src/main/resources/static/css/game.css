@@ -16,7 +16,6 @@ body {
   background: #fff;
   border: 1px solid #999;
   float: left;
-  line-height: 34px;
   height: 75px;
   margin-right: -1px;
   margin-top: -1px;
@@ -36,8 +35,4 @@ body {
 .game {
   display: flex;
   flex-direction: row;
-}
-
-.game-info {
-  margin-left: 20px;
 }
