@@ -19,7 +19,7 @@ public class LandscapeSquare implements Square
         return Optional.of(landscape);
     }
 
-    public int getCrownCount()
+    public int getCrowns()
     {
         return crowns;
     }

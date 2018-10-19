@@ -30,6 +30,7 @@ class Kingdom extends React.Component {
   }
 
   renderRow(row, playerColor) {
+    // TODO: how to loop?
     return (
       <div className="board-row">
         {this.renderSquare(row, 0, playerColor)}
@@ -42,6 +43,7 @@ class Kingdom extends React.Component {
   }
 
   render() {
+    // TODO: how to loop?
     return (
       <div>
         <div>{this.props.playerName}</div>
@@ -66,8 +68,58 @@ class Kingdom extends React.Component {
   }
 }
 
-// TODO: class Tile extends React.Component {
-// }
+class StagedTiles extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  renderSquare(square) {
+    let img = square.landscape + "-" + square.crowns + ".jpg";
+    let content;
+
+    content = (
+      <span className="square">{img}</span>
+    );
+
+    return content;
+  }
+
+  renderTile(slot, isSelecting) {
+    const tile = slot.tile;
+    let player = slot.player;
+
+    let clickable = false;
+    if (player == null) {
+      player = "available";
+      clickable = isSelecting;
+    }
+
+    // TODO: add onClick if is clickable
+    return (
+      <div>
+        {this.renderSquare(tile.squares[0])}
+        {this.renderSquare(tile.squares[1])}
+        {player}
+      </div>
+    );
+  }
+
+  render() {
+    // TODO: how to loop?
+    let isSelecting = false;
+    return (
+      <div>
+        <div>{this.props.label}</div>
+        <div>
+          {this.renderTile(this.props.tiles[0], isSelecting)}
+          {this.renderTile(this.props.tiles[1], isSelecting)}
+          {this.renderTile(this.props.tiles[2], isSelecting)}
+          {this.renderTile(this.props.tiles[3], isSelecting)}
+        </div>
+      </div>
+    );
+  }
+}
 
 class Game extends React.Component {
   constructor(props) {
@@ -134,7 +186,7 @@ class Game extends React.Component {
       status = "No state.currentTurn";
     }
 
-    const content = this.state.kingdoms.map((kingdom) =>
+    const kingdomContent = this.state.kingdoms.map((kingdom) =>
       <Kingdom
         key={kingdom.player.name}
         playerName={kingdom.player.name}
@@ -145,11 +197,32 @@ class Game extends React.Component {
       />
     );
 
+    let thisRoundContent = "";
+    if (this.state.thisRoundTiles != null) {
+      thisRoundContent = (
+        <StagedTiles
+          label="This round"
+          tiles={this.state.thisRoundTiles}
+        />
+      );
+    }
+    let nextRoundContent = "";
+    if (this.state.nextRoundTiles != null) {
+      nextRoundContent = (
+        <StagedTiles
+          label="Next round"
+          tiles={this.state.nextRoundTiles}
+        />
+      );
+    }
+
     return (
-      <div className="game">
+      <div>
         <div>
-          {content}
+          {kingdomContent}
         </div>
+        {thisRoundContent}
+        {nextRoundContent}
         <div>
           {status}
         </div>

@@ -20,7 +20,7 @@ public class KingdomProperty
     private void addLocation(LandscapeSquare square, Location location)
     {
         locations.add(location);
-        crownCount += square.getCrownCount();
+        crownCount += square.getCrowns();
     }
 
     public boolean addSquareIfPossible(LandscapeSquare square, Location location)
