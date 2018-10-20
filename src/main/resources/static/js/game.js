@@ -1,28 +1,27 @@
 class Kingdom extends React.Component {
-  renderSquare(row, col, playerColor) {
+  renderPlotSquare(row, col, playerColor) {
     const square=this.props.squares[row][col];
 
     let content;
     if (square == null) {
       if (this.isEmptySquareClickable(row, col)) {
         content = (
-          <span className="square" onClick={() => this.handleSquareClick(row, col)}>empty</span>
+          <span className="square" onClick={() => this.handleSquareClick(row, col)}/>
         );
       } else {
         content = (
-          <span className="square">empty</span>
+          <span className="square"/>
         );
       }
     } else {
       let img;
       if (square.landscape == null) {
-        img = "castle-" + playerColor + ".jpg";
+        img = "images/castle-" + playerColor + ".jpg";
       } else {
-        img = square.landscape + "-" + square.crowns + ".jpg";
+        img = "images/" + square.landscape + "-" + square.crowns + ".jpg";
       }
-      // TODO: <img src={img}/>
       content = (
-        <span className="square">{img}</span>
+        <img className="square" src={img}/>
       );
     }
 
@@ -33,11 +32,11 @@ class Kingdom extends React.Component {
     // TODO: how to loop?
     return (
       <div className="board-row">
-        {this.renderSquare(row, 0, playerColor)}
-        {this.renderSquare(row, 1, playerColor)}
-        {this.renderSquare(row, 2, playerColor)}
-        {this.renderSquare(row, 3, playerColor)}
-        {this.renderSquare(row, 4, playerColor)}
+        {this.renderPlotSquare(row, 0, playerColor)}
+        {this.renderPlotSquare(row, 1, playerColor)}
+        {this.renderPlotSquare(row, 2, playerColor)}
+        {this.renderPlotSquare(row, 3, playerColor)}
+        {this.renderPlotSquare(row, 4, playerColor)}
       </div>
     );
   }
@@ -73,12 +72,12 @@ class StagedTiles extends React.Component {
     super(props);
   }
 
-  renderSquare(square) {
-    let img = square.landscape + "-" + square.crowns + ".jpg";
+  renderTileSquare(square) {
+    let img = "images/" + square.landscape + "-" + square.crowns + ".jpg";
     let content;
 
     content = (
-      <span className="square">{img}</span>
+      <img className="square" src={img}/>
     );
 
     return content;
@@ -94,12 +93,14 @@ class StagedTiles extends React.Component {
       clickable = isSelecting;
     }
 
-    // TODO: add onClick if is clickable
+    // TODO: add onClick to player if is clickable
     return (
-      <div>
-        {this.renderSquare(tile.squares[0])}
-        {this.renderSquare(tile.squares[1])}
-        {player}
+      <div className="tile">
+        <div>
+          {this.renderTileSquare(tile.squares[0])}
+          {this.renderTileSquare(tile.squares[1])}
+        </div>
+        <div>{player}</div>
       </div>
     );
   }
@@ -108,7 +109,7 @@ class StagedTiles extends React.Component {
     // TODO: how to loop?
     let isSelecting = false;
     return (
-      <div>
+      <div className="stage">
         <div>{this.props.label}</div>
         <div>
           {this.renderTile(this.props.tiles[0], isSelecting)}
@@ -183,7 +184,7 @@ class Game extends React.Component {
         status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
       }
     } else {
-      status = "No state.currentTurn";
+      status = "Initialing...";
     }
 
     const kingdomContent = this.state.kingdoms.map((kingdom) =>
