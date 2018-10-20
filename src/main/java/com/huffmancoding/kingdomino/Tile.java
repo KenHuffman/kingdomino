@@ -6,6 +6,8 @@ public class Tile implements Comparable<Tile>
 
     private final int rank;
 
+    private Player owner = null;
+
     public Tile(LandscapeSquare s1, LandscapeSquare s2, int r)
     {
         squares = new LandscapeSquare[] { s1, s2 };
@@ -48,5 +50,15 @@ public class Tile implements Comparable<Tile>
     public LandscapeSquare[] getSquares()
     {
         return squares;
+    }
+
+    public void setOwner(Player player)
+    {
+        owner = player;
+    }
+
+    public Player getOwner()
+    {
+        return owner;
     }
 }

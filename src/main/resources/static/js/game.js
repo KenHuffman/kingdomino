@@ -43,8 +43,9 @@ class Kingdom extends React.Component {
 
   render() {
     // TODO: how to loop?
+    // TODO: add shiftUp, shiftLeft, shiftDown, shiftRight
     return (
-      <div>
+      <div className="kingdom">
         <div>{this.props.playerName}</div>
         <div>
           {this.renderRow(0, this.props.playerColor)}
@@ -67,7 +68,7 @@ class Kingdom extends React.Component {
   }
 }
 
-class StagedTiles extends React.Component {
+class RoundTiles extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -83,13 +84,12 @@ class StagedTiles extends React.Component {
     return content;
   }
 
-  renderTile(slot, isSelecting) {
-    const tile = slot.tile;
-    let player = slot.player;
+  renderTile(tile, isSelecting) {
+    let player = tile.player;
 
     let clickable = false;
     if (player == null) {
-      player = "available";
+      player = "unclaimed";
       clickable = isSelecting;
     }
 
@@ -201,7 +201,7 @@ class Game extends React.Component {
     let thisRoundContent = "";
     if (this.state.thisRoundTiles != null) {
       thisRoundContent = (
-        <StagedTiles
+        <RoundTiles
           label="This round"
           tiles={this.state.thisRoundTiles}
         />
@@ -210,7 +210,7 @@ class Game extends React.Component {
     let nextRoundContent = "";
     if (this.state.nextRoundTiles != null) {
       nextRoundContent = (
-        <StagedTiles
+        <RoundTiles
           label="Next round"
           tiles={this.state.nextRoundTiles}
         />

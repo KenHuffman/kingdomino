@@ -14,8 +14,8 @@ public class Game
     private static final int sizeOfStage = 4;
     private final List<Kingdom> kingdoms = new ArrayList<>();
     private final TileBag tileBag = new TileBag();
-    private StagedTiles thisRoundTiles;
-    private StagedTiles nextRoundTiles;
+    private RoundTiles thisRoundTiles;
+    private RoundTiles nextRoundTiles;
     private CurrentTurn currentTurn;
 
     public Game() throws IllegalMoveException
@@ -28,7 +28,7 @@ public class Game
         // subtract 1 for the castle square, divide 2 squares per tile
         //int roundsLeft = (size*size - 1) / 2;
 
-        thisRoundTiles = new StagedTiles(tileBag, sizeOfStage);
+        thisRoundTiles = new RoundTiles(tileBag, sizeOfStage);
         nextRoundTiles = null;
         currentTurn = new CurrentTurn(
             kingdoms.get(0).getPlayer(),
@@ -65,12 +65,12 @@ public class Game
         return kingdoms;
     }
 
-    public StagedTiles getThisRoundTiles()
+    public RoundTiles getThisRoundTiles()
     {
         return thisRoundTiles;
     }
 
-    public StagedTiles getNextRoundTiles()
+    public RoundTiles getNextRoundTiles()
     {
         return nextRoundTiles;
     }
@@ -106,7 +106,7 @@ public class Game
         currentTurn = getNextPlayerForInitialSelect();
         if (currentTurn == null)
         {
-            nextRoundTiles = new StagedTiles(tileBag, sizeOfStage);
+            nextRoundTiles = new RoundTiles(tileBag, sizeOfStage);
             currentTurn = getNextPlayerForTilePlacement();
         }
     }
@@ -194,7 +194,7 @@ public class Game
             }
             else
             {
-                nextRoundTiles = new StagedTiles(tileBag, sizeOfStage);
+                nextRoundTiles = new RoundTiles(tileBag, sizeOfStage);
             }
             currentTurn = getNextPlayerForTilePlacement();
         }

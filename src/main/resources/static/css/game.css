@@ -20,15 +20,21 @@
   width: 75px;
 }
 
+.square:focus {
+  outline: none;
+}
+
+.kingdom {
+  text-align: center;
+}
+
 .tile {
 }
 
 .stage {
   text-align: center;
-}
-
-.square:focus {
-  outline: none;
+  display: flex;
+  flex-direction: row;
 }
 
 .kbd-navigation .square:focus {

@@ -1,9 +1,6 @@
 package com.huffmancoding.kingdomino;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.annotation.Resource;
@@ -48,27 +45,11 @@ public class KingdominoController
      * @param stagedTiles the tiles to convert to a list of maps
      */
     private void addRoundTiles(Map<String, Object> gameMap,
-        String key, StagedTiles stagedTiles)
+        String key, RoundTiles stagedTiles)
     {
         if (stagedTiles != null)
         {
-            List<Map<String, Object>> list = new ArrayList<>();
-
-            for (Entry<Tile, Player> entry : stagedTiles.getUnplacedTiles().entrySet())
-            {
-                Map<String, Object> map = new TreeMap<>();
-
-                map.put("tile", entry.getKey());
-                Player player = entry.getValue();
-                if (player != null)
-                {
-                    map.put("player", player);
-                }
-
-                list.add(map);
-            }
-
-            gameMap.put(key, list);
+            gameMap.put(key, stagedTiles.getUnplacedTiles());
         }
     }
 
