@@ -11,7 +11,6 @@
 .square {
   background: #fff;
   border: 1px solid #999;
-  float: left;
   height: 75px;
   margin-right: -1px;
   margin-top: -1px;
@@ -28,13 +27,27 @@
   text-align: center;
 }
 
+.squares-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  justify-content: center;
+}
+
 .tile {
+  display: flex;
+  flex-flow:column nowrap;
+  align-items: center;
 }
 
 .stage {
   text-align: center;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+}
+
+.tiles-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
 }
 
 .kbd-navigation .square:focus {

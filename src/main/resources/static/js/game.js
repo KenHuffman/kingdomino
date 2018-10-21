@@ -1,70 +1,122 @@
-class Kingdom extends React.Component {
-  renderPlotSquare(row, col, playerColor) {
-    const square=this.props.squares[row][col];
-
-    let content;
-    if (square == null) {
-      if (this.isEmptySquareClickable(row, col)) {
-        content = (
-          <span className="square" onClick={() => this.handleSquareClick(row, col)}/>
-        );
-      } else {
-        content = (
-          <span className="square"/>
-        );
-      }
-    } else {
-      let img;
-      if (square.landscape == null) {
-        img = "images/castle-" + playerColor + ".jpg";
-      } else {
-        img = "images/" + square.landscape + "-" + square.crowns + ".jpg";
-      }
-      content = (
-        <img className="square" src={img}/>
-      );
-    }
-
-    return content;
-  }
-
-  renderRow(row, playerColor) {
-    // TODO: how to loop?
-    return (
-      <div className="board-row">
-        {this.renderPlotSquare(row, 0, playerColor)}
-        {this.renderPlotSquare(row, 1, playerColor)}
-        {this.renderPlotSquare(row, 2, playerColor)}
-        {this.renderPlotSquare(row, 3, playerColor)}
-        {this.renderPlotSquare(row, 4, playerColor)}
-      </div>
-    );
+class Square extends React.Component {
+  constructor(props) {
+    super(props);
   }
 
   render() {
-    // TODO: how to loop?
+    if (this.props.type == "empty") {
+      if (this.props.onClick) {
+        return (
+          <span className="square" onClick={this.props.onClick}/>
+        );
+      } else {
+        return (
+          <span className="square"/>
+        )
+      }
+    } else {
+      let img;
+      if (this.props.type == "landscape") {
+        img = "images/" + this.props.landscape + "-" + this.props.crowns + ".jpg";
+      } else {
+        img = "images/castle-" + this.props.color + ".jpg";
+      }
+
+      return (
+        <img className="square" src={img}/>
+      );
+    }
+  }
+}
+
+class Kingdom extends React.Component {
+  render() {
+    let row;
+    let column;
+    let squares = [];
+    for (row = 0; row < this.props.squares.length; row++) {
+      for (column = 0; column < this.props.squares[row].length; column++) {
+        let component;
+        const square = this.props.squares[row][column];
+        if (square == null) {
+          const isClickable = this.isEmptySquareClickable(row, column);
+          // TODO: add onClick
+          component =
+            <Square
+              key={row + ',' + column}
+              type="empty"
+              row={row}
+              column={column}
+            />;
+        } else {
+          if (square.landscape != null) {
+            component =
+              <Square
+                key={row + ',' + column}
+                type="landscape"
+                landscape={square.landscape}
+                crowns={squares.crowns}
+              />;
+          } else {
+            component =
+              <Square
+                key={row + ',' + column}
+                type="castle"
+                color={this.props.playerColor}
+              />;
+          }
+        }
+        squares.push(component);
+      }
+    }
     // TODO: add shiftUp, shiftLeft, shiftDown, shiftRight
     return (
       <div className="kingdom">
         <div>{this.props.playerName}</div>
-        <div>
-          {this.renderRow(0, this.props.playerColor)}
-          {this.renderRow(1, this.props.playerColor)}
-          {this.renderRow(2, this.props.playerColor)}
-          {this.renderRow(3, this.props.playerColor)}
-          {this.renderRow(4, this.props.playerColor)}
+        <div className="squares-container">
+          {squares}
         </div>
       </div>
     );
   }
 
-  isEmptySquareClickable(row, col) {
+  isEmptySquareClickable(row, column) {
     // TODO: check for adjacent to existing tile
     return this.props.isPlacing;
   }
 
-  handleSquareClick(row, col) {
-    console.log('Clicked on row=' + row + ', col=' + col);
+  handleSquareClick(row, column) {
+    console.log('Clicked on row=' + row + ', column=' + column);
+  }
+}
+
+class Tile extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    let player = this.props.player;
+    if (player == null) {
+      player = "unclaimed";
+    }
+
+    // TODO: add onClick to tile if this.props.isSelecting and player == "unclaimed"
+    return (
+      <div className="tile">
+        <Square
+          type="landscape"
+          landscape={this.props.squares[0].landscape}
+          crowns={this.props.squares[0].crowns}
+        />
+        <Square
+          type="landscape"
+          landscape={this.props.squares[1].landscape}
+          crowns={this.props.squares[1].crowns}
+        />
+        <div>{player}</div>
+      </div>
+    );
   }
 }
 
@@ -73,49 +125,21 @@ class RoundTiles extends React.Component {
     super(props);
   }
 
-  renderTileSquare(square) {
-    let img = "images/" + square.landscape + "-" + square.crowns + ".jpg";
-    let content;
-
-    content = (
-      <img className="square" src={img}/>
-    );
-
-    return content;
-  }
-
-  renderTile(tile, isSelecting) {
-    let player = tile.player;
-
-    let clickable = false;
-    if (player == null) {
-      player = "unclaimed";
-      clickable = isSelecting;
-    }
-
-    // TODO: add onClick to player if is clickable
-    return (
-      <div className="tile">
-        <div>
-          {this.renderTileSquare(tile.squares[0])}
-          {this.renderTileSquare(tile.squares[1])}
-        </div>
-        <div>{player}</div>
-      </div>
-    );
-  }
-
   render() {
-    // TODO: how to loop?
-    let isSelecting = false;
+    // TODO: add isSelecting prop based on currentTurn
+    const tiles = this.props.tiles.map((tile) =>
+      <Tile
+        key={tile.rank}
+        squares={tile.squares}
+        player={tile.player}
+      />
+    );
+
     return (
       <div className="stage">
         <div>{this.props.label}</div>
-        <div>
-          {this.renderTile(this.props.tiles[0], isSelecting)}
-          {this.renderTile(this.props.tiles[1], isSelecting)}
-          {this.renderTile(this.props.tiles[2], isSelecting)}
-          {this.renderTile(this.props.tiles[3], isSelecting)}
+        <div className="tiles-container">
+          {tiles}
         </div>
       </div>
     );
@@ -184,7 +208,7 @@ class Game extends React.Component {
         status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
       }
     } else {
-      status = "Initialing...";
+      status = "Initializing...";
     }
 
     const kingdomContent = this.state.kingdoms.map((kingdom) =>
@@ -232,7 +256,4 @@ class Game extends React.Component {
   }
 }
 
-// ========================================
-
 ReactDOM.render(<Game />, document.getElementById("game"));
-
