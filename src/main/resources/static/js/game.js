@@ -40,7 +40,7 @@ class Kingdom extends React.Component {
         const square = this.props.squares[row][column];
         if (square == null) {
           const isClickable = this.isEmptySquareClickable(row, column);
-          // TODO: add onClick
+          // TODO: add onClick to handleSquareClick(row, column);
           component =
             <Square
               key={row + ',' + column}
@@ -69,10 +69,15 @@ class Kingdom extends React.Component {
         squares.push(component);
       }
     }
+    let label = this.props.playerName;
+    if (this.props.tileSelector) {
+      label += ", should place the tile";
+    }
+
     // TODO: add shiftUp, shiftLeft, shiftDown, shiftRight
     return (
       <div className="kingdom">
-        <div>{this.props.playerName}</div>
+        <div>{label}</div>
         <div className="squares-container">
           {squares}
         </div>
@@ -81,12 +86,8 @@ class Kingdom extends React.Component {
   }
 
   isEmptySquareClickable(row, column) {
-    // TODO: check for adjacent to existing tile
+    // TODO: check for adjacent to existing tile or adjacent to first click
     return this.props.isPlacing;
-  }
-
-  handleSquareClick(row, column) {
-    console.log('Clicked on row=' + row + ', column=' + column);
   }
 }
 
@@ -96,9 +97,16 @@ class Tile extends React.Component {
   }
 
   render() {
-    let player = this.props.player;
-    if (player == null) {
-      player = "unclaimed";
+    let owner = this.props.owner;
+    if (owner == null) {
+      if (this.props.selector) {
+        owner =
+          <button onClick={() => this.props.onSelection(this.props.selector, this.props.rank)}>
+            {this.props.selector}
+          </button>;
+      } else {
+        owner = <span>unclaimed</span>;
+      }
     }
 
     // TODO: add onClick to tile if this.props.isSelecting and player == "unclaimed"
@@ -114,7 +122,7 @@ class Tile extends React.Component {
           landscape={this.props.squares[1].landscape}
           crowns={this.props.squares[1].crowns}
         />
-        <div>{player}</div>
+        <div>{owner}</div>
       </div>
     );
   }
@@ -126,18 +134,24 @@ class RoundTiles extends React.Component {
   }
 
   render() {
-    // TODO: add isSelecting prop based on currentTurn
     const tiles = this.props.tiles.map((tile) =>
       <Tile
         key={tile.rank}
+        rank={tile.rank}
         squares={tile.squares}
-        player={tile.player}
+        owner={tile.owner}
+        selector={this.props.tileSelector}
+        onSelection={this.props.onTileSelection}
       />
     );
 
+    let label = this.props.label;
+    if (this.props.tileSelector) {
+      label += ", " + this.props.tileSelector + " should select a tile"
+    }
     return (
       <div className="stage">
-        <div>{this.props.label}</div>
+        <div>{label}</div>
         <div className="tiles-container">
           {tiles}
         </div>
@@ -154,17 +168,22 @@ class Game extends React.Component {
     };
   }
 
+  refreshGame(result)
+  {
+    this.setState({
+      kingdoms: result.kingdoms,
+      thisRoundTiles: result.thisRoundTiles,
+      nextRoundTiles: result.nextRoundTiles,
+      currentTurn: result.currentTurn
+    });
+  }
+
   componentDidMount() {
     fetch("getgame")
       .then(res => res.json())
       .then(
         (result) => {
-          this.setState({
-            kingdoms: result.kingdoms,
-            thisRoundTiles: result.thisRoundTiles,
-            nextRoundTiles: result.nextRoundTiles,
-            currentTurn: result.currentTurn
-          });
+          this.refreshGame(result);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -177,23 +196,27 @@ class Game extends React.Component {
       );
   }
 
-  handleSquareClick(row, col) {
-    const playerKingdom = this.currentPlayerKingdom();
+  handleTileSelection(selector, rank) {
+    fetch("claimtile/" + encodeURIComponent(selector) + "/" + rank, {
+      method: 'PUT'
+    })
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.refreshGame(result);
+      },
+      // Note: it's important to handle errors here
+      // instead of a catch() block so that we don't swallow
+      // exceptions from actual bugs in components.
+      (error) => {
+        this.setState({
+          error
+        });
+      }
+    );
   }
 
-  currentPlayerKingdom()
-  {
-    const kingdoms = this.state.kingdoms;
-    if (kingdoms == null) {
-      return null;
-    }
-
-    for (let i = 0; i < kingdoms.length; i++) {
-      const kingdom = kingdoms[i];
-      if (kingdom.player.name == this.state.currentTurn.player.name) {
-        return kingdom;
-      }
-    }
+  handleSquareClick(row, col) {
   }
 
   render() {
@@ -201,11 +224,18 @@ class Game extends React.Component {
     const currentTurn = this.state.currentTurn;
 
     let status;
+    let thisRoundSelector = null;
+    let nextRoundSelector = null;
     if (currentTurn != null) {
       if (currentTurn.task == "GAME_OVER") {
         status = "Winner: " + currentTurn.player.name;
       } else {
         status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
+        if (currentTurn.task = "CHOOSING_INITIAL_TILE") {
+          thisRoundSelector = currentTurn.player.name;
+        } else if (currentTurn.task = "CHOOSING_NEXT_TILE") {
+          nextRoundSelector = currentTurn.player.name;
+        }
       }
     } else {
       status = "Initializing...";
@@ -228,6 +258,8 @@ class Game extends React.Component {
         <RoundTiles
           label="This round"
           tiles={this.state.thisRoundTiles}
+          tileSelector={thisRoundSelector}
+          onTileSelection={this.handleTileSelection}
         />
       );
     }
@@ -237,6 +269,8 @@ class Game extends React.Component {
         <RoundTiles
           label="Next round"
           tiles={this.state.nextRoundTiles}
+          tileSelector={thisNextSelector}
+          onTileSelection={this.handleTileSelection}
         />
       );
     }

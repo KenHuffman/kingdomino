@@ -7,8 +7,8 @@ import javax.annotation.Resource;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,28 +29,30 @@ public class KingdominoController
     @GetMapping("/getgame")
     public ResponseEntity<?> getGame()
     {
-        Map<String, Object> gameMap = new TreeMap<>();
-        gameMap.put("kingdoms", game.getAllKingdoms());
-        addRoundTiles(gameMap, "thisRoundTiles", game.getThisRoundTiles());
-        addRoundTiles(gameMap, "nextRoundTiles", game.getNextRoundTiles());
-        gameMap.put("currentTurn", game.getCurrentTurn());
-        return ResponseEntity.ok(gameMap);
+        return ResponseEntity.ok(getGameResponse());
     }
 
-    /**
-     * Convert the unplaced tiles of a staged collection into a game map.
-     *
-     * @param gameMap the map to add the list of tiles to
-     * @param key the key for the list to be added
-     * @param stagedTiles the tiles to convert to a list of maps
-     */
-    private void addRoundTiles(Map<String, Object> gameMap,
-        String key, RoundTiles stagedTiles)
+    private Map<String, Object> getGameResponse()
     {
-        if (stagedTiles != null)
+        Map<String, Object> gameMap = new TreeMap<>();
+
+        gameMap.put("kingdoms", game.getAllKingdoms());
+
+        RoundTiles thisRoundTiles = game.getThisRoundTiles();
+        if (thisRoundTiles != null)
         {
-            gameMap.put(key, stagedTiles.getUnplacedTiles());
+            gameMap.put("thisRoundTiles", thisRoundTiles.getRemainingTiles());
         }
+
+        RoundTiles nextRoundTiles = game.getNextRoundTiles();
+        if (nextRoundTiles != null)
+        {
+            gameMap.put("nextRoundTiles", nextRoundTiles.getRemainingTiles());
+        }
+
+        gameMap.put("currentTurn", game.getCurrentTurn());
+
+        return gameMap;
     }
 
     /**
@@ -59,15 +61,15 @@ public class KingdominoController
      * @param rank
      * @return
      */
-    @PostMapping("/claimtile")
+    @PutMapping("/claimtile/{playerName}/{rank}")
     public ResponseEntity<?> handleClaimTile(
-        @RequestParam("playerName") String playerName,
-        @RequestParam("rank") int rank)
+        @PathVariable String playerName,
+        @PathVariable int rank)
     {
         try
         {
             game.claimTile(playerName, rank);
-            return ResponseEntity.ok(null);
+            return ResponseEntity.ok(getGameResponse());
         }
         catch (IllegalMoveException ex)
         {
@@ -75,18 +77,19 @@ public class KingdominoController
         }
     }
 
-    @PostMapping("/placetile")
+    @PutMapping("/placetile/{playerName}/{rank}/{row0}/{column0}/{row1}/{column1}")
     public ResponseEntity<?> handlePlaceTile(
-        @RequestParam("playerName") String playerName,
-        @RequestParam("row0") int row0,
-        @RequestParam("column0") int column0,
-        @RequestParam("row1") int row1,
-        @RequestParam("column1") int column1)
+        @PathVariable String playerName,
+        @PathVariable int rank,
+        @PathVariable int row0,
+        @PathVariable int column0,
+        @PathVariable int row1,
+        @PathVariable int column1)
     {
         try
         {
-            game.placeTile(playerName, new Location(row0, column0), new Location(row1, column1));
-            return ResponseEntity.ok(null);
+            game.placeTile(playerName, rank, new Location(row0, column0), new Location(row1, column1));
+            return ResponseEntity.ok(getGameResponse());
         }
         catch (IllegalMoveException ex)
         {

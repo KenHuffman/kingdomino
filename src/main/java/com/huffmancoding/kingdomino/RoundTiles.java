@@ -17,7 +17,6 @@ public class RoundTiles
         {
             rankedTiles.add(tileBag.drawRandomTile());
         }
-
     }
 
     public void claimRank(Player player, int rank) throws IllegalMoveException
@@ -34,7 +33,7 @@ public class RoundTiles
         throw new IllegalMoveException("Cannot claim a tile that is not staged");
     }
 
-    public SortedSet<Tile> getUnplacedTiles()
+    public SortedSet<Tile> getRemainingTiles()
     {
         return rankedTiles;
     }
@@ -58,7 +57,7 @@ public class RoundTiles
         return rankedTiles.iterator().next().getOwner();
     }
 
-    public Tile removeNextTile(String playerName) throws IllegalMoveException
+    public Tile removeNextTile(String playerName, int rank) throws IllegalMoveException
     {
         Player player = getNextPlacingPlayer();
         if (player == null || ! player.getName().equals(playerName))
@@ -68,6 +67,12 @@ public class RoundTiles
         }
 
         Tile tile = rankedTiles.first();
+        if (tile.getRank() != rank)
+        {
+            throw new IllegalMoveException("Rank " + rank +
+                " is not the next tile to be placed.");
+        }
+
         rankedTiles.remove(tile);
 
         return tile;

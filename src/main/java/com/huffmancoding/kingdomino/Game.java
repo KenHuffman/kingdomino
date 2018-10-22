@@ -127,7 +127,7 @@ public class Game
         return null;
     }
 
-    public void placeTile(String playerName, Location location0, Location location1)
+    public void placeTile(String playerName, int rank, Location location0, Location location1)
         throws IllegalMoveException
     {
         Player player = currentTurn.getPlayer();
@@ -141,7 +141,7 @@ public class Game
             throw new IllegalMoveException("It is not time to place a tile");
         }
 
-        Tile tile = thisRoundTiles.removeNextTile(playerName);
+        Tile tile = thisRoundTiles.removeNextTile(playerName, rank);
         Kingdom kingdom = getKingdom(player);
 
         kingdom.placeTile(tile, location0, location1);
