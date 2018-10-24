@@ -70,7 +70,7 @@ class Kingdom extends React.Component {
       }
     }
     let label = this.props.playerName;
-    if (this.props.tileSelector) {
+    if (this.props.currentPlayer) {
       label += ", should place the tile";
     }
 
@@ -97,16 +97,19 @@ class Tile extends React.Component {
   }
 
   render() {
-    let owner = this.props.owner;
-    if (owner == null) {
-      if (this.props.selector) {
-        owner =
-          <button onClick={() => this.props.onSelection(this.props.selector, this.props.rank)}>
-            {this.props.selector}
+    let ownerContent = "";
+    if (this.props.tileOwner == null) {
+      if (this.props.currentPlayer) {
+        ownerContent =
+          <button onClick={() => this.props.onTileSelection(this.props.currentPlayer, this.props.rank)}>
+            {this.props.currentPlayer.name}
           </button>;
       } else {
-        owner = <span>unclaimed</span>;
+        ownerContent = <span>unclaimed</span>;
       }
+    }
+    else {
+      ownerContent = <span>{this.props.tileOwner.name}</span>;
     }
 
     // TODO: add onClick to tile if this.props.isSelecting and player == "unclaimed"
@@ -122,7 +125,7 @@ class Tile extends React.Component {
           landscape={this.props.squares[1].landscape}
           crowns={this.props.squares[1].crowns}
         />
-        <div>{owner}</div>
+        <div>{ownerContent}</div>
       </div>
     );
   }
@@ -134,21 +137,22 @@ class RoundTiles extends React.Component {
   }
 
   render() {
+    let label = this.props.label;
+    if (this.props.currentPlayer) {
+      label += ", " + this.props.currentPlayer.name + " should select a tile"
+    }
+
     const tiles = this.props.tiles.map((tile) =>
       <Tile
         key={tile.rank}
         rank={tile.rank}
         squares={tile.squares}
-        owner={tile.owner}
-        selector={this.props.tileSelector}
-        onSelection={this.props.onTileSelection}
+        tileOwner={tile.owner}
+        currentPlayer={this.props.currentPlayer}
+        onTileSelection={this.props.onTileSelection}
       />
     );
 
-    let label = this.props.label;
-    if (this.props.tileSelector) {
-      label += ", " + this.props.tileSelector + " should select a tile"
-    }
     return (
       <div className="stage">
         <div>{label}</div>
@@ -166,6 +170,7 @@ class Game extends React.Component {
     this.state = {
       kingdoms: []
     };
+    this.handleTileSelection = this.handleTileSelection.bind(this);
   }
 
   refreshGame(result)
@@ -196,8 +201,8 @@ class Game extends React.Component {
       );
   }
 
-  handleTileSelection(selector, rank) {
-    fetch("claimtile/" + encodeURIComponent(selector) + "/" + rank, {
+  handleTileSelection(currentPlayer, rank) {
+    fetch("claimtile/" + encodeURIComponent(currentPlayer.name) + "/" + rank, {
       method: 'PUT'
     })
     .then(res => res.json())
@@ -232,9 +237,9 @@ class Game extends React.Component {
       } else {
         status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
         if (currentTurn.task = "CHOOSING_INITIAL_TILE") {
-          thisRoundSelector = currentTurn.player.name;
+          thisRoundSelector = currentTurn.player;
         } else if (currentTurn.task = "CHOOSING_NEXT_TILE") {
-          nextRoundSelector = currentTurn.player.name;
+          nextRoundSelector = currentTurn.player;
         }
       }
     } else {
@@ -258,7 +263,7 @@ class Game extends React.Component {
         <RoundTiles
           label="This round"
           tiles={this.state.thisRoundTiles}
-          tileSelector={thisRoundSelector}
+          currentPlayer={thisRoundSelector}
           onTileSelection={this.handleTileSelection}
         />
       );
@@ -269,7 +274,7 @@ class Game extends React.Component {
         <RoundTiles
           label="Next round"
           tiles={this.state.nextRoundTiles}
-          tileSelector={thisNextSelector}
+          currentPlayer={nextRoundSelector}
           onTileSelection={this.handleTileSelection}
         />
       );

@@ -10,36 +10,45 @@ import com.huffmancoding.kingdomino.CurrentTurn.Task;
 @Component("game")
 public class Game
 {
-    private static final int kingdomDimension = 5;
-    private static final int sizeOfStage = 4;
-    private final List<Kingdom> kingdoms = new ArrayList<>();
-    private final TileBag tileBag = new TileBag();
+    private int kingdomDimension;
+    private int roundTileCount;
+    private List<Kingdom> kingdoms;
+    private TileBag tileBag;
     private RoundTiles thisRoundTiles;
     private RoundTiles nextRoundTiles;
     private CurrentTurn currentTurn;
 
     public Game() throws IllegalMoveException
     {
-        addPlayer("Stark", "green");
-        addPlayer("Lannister", "yellow");
-        addPlayer("Arryn", "blue");
-        addPlayer("Hoare", "pink");
+        init(4, 5);
+    }
+
+    public void init(int playerCount, int dimension) throws IllegalMoveException
+    {
+        kingdomDimension = dimension;
+        roundTileCount = playerCount;
+
+        kingdoms = new ArrayList<>();
+        tileBag = new TileBag();
+
+        String[] playerNames = new String[] { "Stark", "Lannister", "Arryn", "Hoare", "pink" };
+        String[] playerColors = new String[] { "green", "yellow", "blue", "pink" };
+
+        for (int i = 0; i < playerCount; ++i)
+        {
+            Player player = new Player(playerNames[i], playerColors[i]);
+            Kingdom kingdom = new Kingdom(kingdomDimension, player);
+            kingdoms.add(kingdom);
+        }
 
         // subtract 1 for the castle square, divide 2 squares per tile
         //int roundsLeft = (size*size - 1) / 2;
 
-        thisRoundTiles = new RoundTiles(tileBag, sizeOfStage);
+        thisRoundTiles = new RoundTiles(tileBag, roundTileCount);
         nextRoundTiles = null;
         currentTurn = new CurrentTurn(
-            kingdoms.get(0).getPlayer(),
+            kingdoms.get((int)(Math.random()*playerCount)).getPlayer(),
             Task.CHOOSING_INITIAL_TILE);
-    }
-
-    private void addPlayer(String playerName, String colorName)
-    {
-        Player player = new Player(playerName, colorName);
-        Kingdom kingdom = new Kingdom(kingdomDimension, player);
-        kingdoms.add(kingdom);
     }
 
     public CurrentTurn getCurrentTurn()
@@ -106,7 +115,7 @@ public class Game
         currentTurn = getNextPlayerForInitialSelect();
         if (currentTurn == null)
         {
-            nextRoundTiles = new RoundTiles(tileBag, sizeOfStage);
+            nextRoundTiles = new RoundTiles(tileBag, roundTileCount);
             currentTurn = getNextPlayerForTilePlacement();
         }
     }
@@ -194,7 +203,7 @@ public class Game
             }
             else
             {
-                nextRoundTiles = new RoundTiles(tileBag, sizeOfStage);
+                nextRoundTiles = new RoundTiles(tileBag, roundTileCount);
             }
             currentTurn = getNextPlayerForTilePlacement();
         }

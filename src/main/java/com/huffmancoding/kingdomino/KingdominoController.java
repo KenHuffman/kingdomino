@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +31,20 @@ public class KingdominoController
     public ResponseEntity<?> getGame()
     {
         return ResponseEntity.ok(getGameResponse());
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<?> reset()
+    {
+        try
+        {
+            game.init(4, 5);
+            return ResponseEntity.ok(getGameResponse());
+        }
+        catch (IllegalMoveException ex)
+        {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     private Map<String, Object> getGameResponse()
