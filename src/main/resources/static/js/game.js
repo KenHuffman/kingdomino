@@ -70,7 +70,7 @@ class Kingdom extends React.Component {
       }
     }
     let label = this.props.playerName;
-    if (this.props.currentPlayer) {
+    if (this.props.placingTile) {
       label += ", should place the tile";
     }
 
@@ -87,7 +87,7 @@ class Kingdom extends React.Component {
 
   isEmptySquareClickable(row, column) {
     // TODO: check for adjacent to existing tile or adjacent to first click
-    return this.props.isPlacing;
+    return this.props.placingTile != null;
   }
 }
 
@@ -171,6 +171,7 @@ class Game extends React.Component {
       kingdoms: []
     };
     this.handleTileSelection = this.handleTileSelection.bind(this);
+    this.handleTilePlacement = this.handleTilePlacement.bind(this);
   }
 
   refreshGame(result)
@@ -221,7 +222,7 @@ class Game extends React.Component {
     );
   }
 
-  handleSquareClick(row, col) {
+  handleTilePlacement(row0, col0, row1, col1) {
   }
 
   render() {
@@ -231,15 +232,18 @@ class Game extends React.Component {
     let status;
     let thisRoundSelector = null;
     let nextRoundSelector = null;
+    let placingTile = null;
     if (currentTurn != null) {
       if (currentTurn.task == "GAME_OVER") {
         status = "Winner: " + currentTurn.player.name;
       } else {
         status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
-        if (currentTurn.task = "CHOOSING_INITIAL_TILE") {
+        if (currentTurn.task == "CHOOSING_INITIAL_TILE") {
           thisRoundSelector = currentTurn.player;
-        } else if (currentTurn.task = "CHOOSING_NEXT_TILE") {
+        } else if (currentTurn.task == "CHOOSING_NEXT_TILE") {
           nextRoundSelector = currentTurn.player;
+        } else if (currentTurn.task == "PLACING_TILE") {
+          placingTile = this.state.thisRoundTiles[0];
         }
       }
     } else {
@@ -251,9 +255,10 @@ class Game extends React.Component {
         key={kingdom.player.name}
         playerName={kingdom.player.name}
         playerColor={kingdom.player.colorName}
-        isPlacing={currentTurn != null && currentTurn.player.name == kingdom.player.name && currentTurn.task == "PLACING_TILE"}
+        placingTile={currentTurn != null && currentTurn.player.name == kingdom.player.name
+          ? placingTile : null}
         squares={kingdom.allSquares}
-        onClick={(row, col) => this.handleSquareClick(row, col)}
+        onTilePlacement={this.handleTilePlacement}
       />
     );
 
