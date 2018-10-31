@@ -1,3 +1,22 @@
+class Hint extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    if (this.props.landscape != null) {
+      const img = "images/" + this.props.landscape + "-" + this.props.crowns + ".jpg";
+      return (
+        <img className="hint" src={img}/>
+      );
+    } else {
+      return (
+        <span className="hint"/>
+      )
+    }
+  }
+}
+
 class Square extends React.Component {
   constructor(props) {
     super(props);
@@ -5,15 +24,43 @@ class Square extends React.Component {
 
   render() {
     if (this.props.type == "empty") {
-      if (this.props.onClick) {
-        return (
-          <span className="square" onClick={this.props.onClick}/>
-        );
+      //if (this.props.onClick) {
+      //  return (
+      //    <span className="square" onClick={this.props.onClick}/>
+      //  );
+      //} else {
+      let hints = [];
+      hints.push(<Hint key="northwest"/>);
+      if (this.props.emptynorth) {
+        hints.push(<Hint key="north" landscape="ORE" crowns="3"/>);
       } else {
-        return (
-          <span className="square"/>
-        )
+        hints.push(<Hint key="north"/>);
       }
+      hints.push(<Hint key="northeast"/>);
+      if (this.props.emptywest) {
+        hints.push(<Hint key="west" landscape="SWAMP" crowns="2"/>);
+      } else {
+        hints.push(<Hint key="west"/>);
+      }
+      hints.push(<Hint key="center"/>);
+      if (this.props.emptyeast) {
+        hints.push(<Hint key="east" landscape="GRASS" crowns="1"/>);
+      } else {
+        hints.push(<Hint key="east"/>);
+      }
+      hints.push(<Hint key="southwest"/>);
+      if (this.props.emptysouth) {
+        hints.push(<Hint key="south" landscape="TREES" crowns="0"/>);
+      } else {
+        hints.push(<Hint key="south"/>);
+      }
+      hints.push(<Hint key="southeast"/>);
+      return (
+        <div className="emptysquare">
+           {hints}
+        </div>
+      )
+      //}
     } else {
       let img;
       if (this.props.type == "landscape") {
@@ -23,7 +70,7 @@ class Square extends React.Component {
       }
 
       return (
-        <img className="square" src={img}/>
+        <img className="imagesquare" src={img}/>
       );
     }
   }
@@ -39,14 +86,22 @@ class Kingdom extends React.Component {
         let component;
         const square = this.props.squares[row][column];
         if (square == null) {
-          const isClickable = this.isEmptySquareClickable(row, column);
+          const isClickable = this.props.placingTile != null;
           // TODO: add onClick to handleSquareClick(row, column);
+          const emptynorth = row > 0 && this.props.squares[row-1][column] == null;
+          const emptywest = column > 0 && this.props.squares[row][column-1] == null;
+          const emptyeast = column+1 < this.props.squares.length && this.props.squares[row][column+1] == null;
+          const emptysouth = row+1 < this.props.squares.length && this.props.squares[row+1][column] == null;
           component =
             <Square
               key={row + ',' + column}
               type="empty"
               row={row}
               column={column}
+              emptynorth={emptynorth}
+              emptywest={emptywest}
+              emptyeast={emptyeast}
+              emptysouth={emptysouth}
             />;
         } else {
           if (square.landscape != null) {
@@ -84,11 +139,6 @@ class Kingdom extends React.Component {
       </div>
     );
   }
-
-  isEmptySquareClickable(row, column) {
-    // TODO: check for adjacent to existing tile or adjacent to first click
-    return this.props.placingTile != null;
-  }
 }
 
 class Tile extends React.Component {
@@ -112,7 +162,6 @@ class Tile extends React.Component {
       ownerContent = <span>{this.props.tileOwner.name}</span>;
     }
 
-    // TODO: add onClick to tile if this.props.isSelecting and player == "unclaimed"
     return (
       <div className="tile">
         <Square
