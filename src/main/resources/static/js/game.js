@@ -4,14 +4,19 @@ class Hint extends React.Component {
   }
 
   render() {
-    if (this.props.landscape != null) {
-      const img = "images/" + this.props.landscape + "-" + this.props.crowns + ".jpg";
+    if (this.props.direction != null) {
       return (
-        <img className="hint" src={img}/>
-      );
+        <span
+          className="hint"
+          onMouseEnter={() => this.props.onMouseEnter(this.props.direction)}
+          onMouseLeave={() => this.props.onMouseLeave(this.props.direction)}
+        />
+      )
     } else {
       return (
-        <span className="hint"/>
+        <span
+          className="hint"
+        />
       )
     }
   }
@@ -20,41 +25,85 @@ class Hint extends React.Component {
 class Square extends React.Component {
   constructor(props) {
     super(props);
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseLeave = this.handleMouseLeave.bind(this);
+  }
+
+  handleMouseEnter(direction) {
+    //console.log('handleMouseEnter ' + this.props.row + ',' + this.props.column + ' ' + direction)
+    this.props.onShowHint(this.props.row, this.props.column, direction)
+  }
+
+  handleMouseLeave(direction) {
+    //console.log('handleMouseLeave ' + this.props.row + ',' + this.props.column + ' ' + direction)
+    this.props.onHideHint(this.props.row, this.props.column, direction)
   }
 
   render() {
     if (this.props.type == "empty") {
-      //if (this.props.onClick) {
-      //  return (
-      //    <span className="square" onClick={this.props.onClick}/>
-      //  );
-      //} else {
       let hints = [];
       hints.push(<Hint key="northwest"/>);
-      if (this.props.emptynorth) {
-        hints.push(<Hint key="north" landscape="ORE" crowns="3"/>);
+
+      if (this.props.northhint) {
+        hints.push(<Hint
+          key="north"
+          direction="north"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+        />);
       } else {
-        hints.push(<Hint key="north"/>);
+        hints.push(<Hint
+          key="north"
+        />);
       }
+
       hints.push(<Hint key="northeast"/>);
-      if (this.props.emptywest) {
-        hints.push(<Hint key="west" landscape="SWAMP" crowns="2"/>);
+
+      if (this.props.westhint) {
+        hints.push(<Hint
+          key="west"
+          direction="west"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+        />);
       } else {
-        hints.push(<Hint key="west"/>);
+        hints.push(<Hint
+          key="west"
+        />);
       }
+
       hints.push(<Hint key="center"/>);
-      if (this.props.emptyeast) {
-        hints.push(<Hint key="east" landscape="GRASS" crowns="1"/>);
+
+      if (this.props.easthint) {
+        hints.push(<Hint
+          key="east"
+          direction="east"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+        />);
       } else {
-        hints.push(<Hint key="east"/>);
+        hints.push(<Hint
+          key="east"
+        />);
       }
+
       hints.push(<Hint key="southwest"/>);
-      if (this.props.emptysouth) {
-        hints.push(<Hint key="south" landscape="TREES" crowns="0"/>);
+
+      if (this.props.southhint) {
+        hints.push(<Hint
+          key="south"
+          direction="south"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+        />);
       } else {
-        hints.push(<Hint key="south"/>);
+        hints.push(<Hint
+          key="south"
+        />);
       }
+
       hints.push(<Hint key="southeast"/>);
+
       return (
         <div className="emptysquare">
            {hints}
@@ -77,6 +126,34 @@ class Square extends React.Component {
 }
 
 class Kingdom extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleShowHint = this.handleShowHint.bind(this);
+    this.handleHideHint = this.handleHideHint.bind(this);
+  }
+
+  handleShowHint(row0, column0, direction) {
+    const square0 = this.props.placingTile.squares[0];
+    const square1 = this.props.placingTile.squares[1];
+
+    let row1 = row0;
+    let column1 = column0;
+    if (direction == "north") {
+      row1 = row0-1;
+    } else if (direction == "west") {
+      column1 = column0-1;
+    } else if (direction == "east") {
+      column1 = column0+1;
+    } else {
+      row1 = row0+1;
+    }
+    console.log('handleShowHint (' + row0 + ',' + column0 + ') => ' + square0.landscape + ', (' + row1 + ',' + column1 + ') => ' + square1.landscape);
+  }
+
+  handleHideHint(row0, column0, direction) {
+    console.log('handleHideHint ' + row0 + ',' + column0 + ' ' + direction)
+  }
+
   render() {
     let row;
     let column;
@@ -86,23 +163,34 @@ class Kingdom extends React.Component {
         let component;
         const square = this.props.squares[row][column];
         if (square == null) {
-          const isClickable = this.props.placingTile != null;
-          // TODO: add onClick to handleSquareClick(row, column);
-          const emptynorth = row > 0 && this.props.squares[row-1][column] == null;
-          const emptywest = column > 0 && this.props.squares[row][column-1] == null;
-          const emptyeast = column+1 < this.props.squares.length && this.props.squares[row][column+1] == null;
-          const emptysouth = row+1 < this.props.squares.length && this.props.squares[row+1][column] == null;
-          component =
-            <Square
-              key={row + ',' + column}
-              type="empty"
-              row={row}
-              column={column}
-              emptynorth={emptynorth}
-              emptywest={emptywest}
-              emptyeast={emptyeast}
-              emptysouth={emptysouth}
-            />;
+          if (this.props.placingTile != null) {
+            const northhint = row > 0 && this.props.squares[row-1][column] == null;
+            const westhint = column > 0 && this.props.squares[row][column-1] == null;
+            const easthint = column+1 < this.props.squares.length && this.props.squares[row][column+1] == null;
+            const southhint = row+1 < this.props.squares.length && this.props.squares[row+1][column] == null;
+            component =
+              <Square
+                key={row + ',' + column}
+                type="empty"
+                row={row}
+                column={column}
+                placingTile={this.props.placingTile}
+                northhint={northhint}
+                westhint={westhint}
+                easthint={easthint}
+                southhint={southhint}
+                onShowHint={this.handleShowHint}
+                onHideHint={this.handleHideHint}
+              />;
+          } else {
+            component =
+              <Square
+                key={row + ',' + column}
+                type="empty"
+                row={row}
+                column={column}
+              />;
+          }
         } else {
           if (square.landscape != null) {
             component =
