@@ -6,15 +6,15 @@ class Hint extends React.Component {
   render() {
     if (this.props.direction != null) {
       return (
-        <span
-          className="hint"
+        <div
+          className={'hint dir-' + this.props.direction}
           onMouseEnter={() => this.props.onMouseEnter(this.props.direction)}
           onMouseLeave={() => this.props.onMouseLeave(this.props.direction)}
         />
       )
     } else {
       return (
-        <span
+        <div
           className="hint"
         />
       )
@@ -30,98 +30,72 @@ class Square extends React.Component {
   }
 
   handleMouseEnter(direction) {
-    //console.log('handleMouseEnter ' + this.props.row + ',' + this.props.column + ' ' + direction)
     this.props.onShowHint(this.props.row, this.props.column, direction)
   }
 
   handleMouseLeave(direction) {
-    //console.log('handleMouseLeave ' + this.props.row + ',' + this.props.column + ' ' + direction)
     this.props.onHideHint(this.props.row, this.props.column, direction)
   }
 
   render() {
-    if (this.props.type == "empty") {
-      let hints = [];
-      hints.push(<Hint key="northwest"/>);
-
-      if (this.props.northhint) {
-        hints.push(<Hint
-          key="north"
-          direction="north"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        />);
-      } else {
-        hints.push(<Hint
-          key="north"
-        />);
-      }
-
-      hints.push(<Hint key="northeast"/>);
-
-      if (this.props.westhint) {
-        hints.push(<Hint
-          key="west"
-          direction="west"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        />);
-      } else {
-        hints.push(<Hint
-          key="west"
-        />);
-      }
-
-      hints.push(<Hint key="center"/>);
-
-      if (this.props.easthint) {
-        hints.push(<Hint
-          key="east"
-          direction="east"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        />);
-      } else {
-        hints.push(<Hint
-          key="east"
-        />);
-      }
-
-      hints.push(<Hint key="southwest"/>);
-
-      if (this.props.southhint) {
-        hints.push(<Hint
-          key="south"
-          direction="south"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        />);
-      } else {
-        hints.push(<Hint
-          key="south"
-        />);
-      }
-
-      hints.push(<Hint key="southeast"/>);
-
-      return (
-        <div className="emptysquare">
-           {hints}
-        </div>
-      )
-      //}
-    } else {
-      let img;
-      if (this.props.type == "landscape") {
-        img = "images/" + this.props.landscape + "-" + this.props.crowns + ".jpg";
-      } else {
-        img = "images/castle-" + this.props.color + ".jpg";
-      }
-
-      return (
-        <img className="imagesquare" src={img}/>
-      );
+    let img = "";
+    if (this.props.type == "landscape") {
+      img =
+        <img
+          className="landscape"
+          src={"images/" + this.props.landscape + "-" + this.props.crowns + ".jpg"}
+        />;
+    } else if (this.props.type == "castle") {
+      img =
+        <img
+          className="landscape"
+          src={"images/castle-" + this.props.color + ".jpg"}
+        />;
     }
+
+    let hints = [];
+    if (this.props.northhint) {
+      hints.push(<Hint
+        key="north"
+        direction="north"
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      />);
+    }
+
+    if (this.props.westhint) {
+      hints.push(<Hint
+        key="west"
+        direction="west"
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      />);
+    }
+
+    if (this.props.easthint) {
+      hints.push(<Hint
+        key="east"
+        direction="east"
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      />);
+    }
+
+    if (this.props.southhint) {
+      hints.push(<Hint
+        key="south"
+        direction="south"
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      />);
+    }
+
+    return (
+      <div className="square">
+        {img}
+        {hints}
+      </div>
+    );
   }
 }
 

@@ -1,14 +1,8 @@
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
-}
-
 .status {
   margin-bottom: 10px;
 }
 
-.imagesquare {
+.square {
   background: #fff;
   border: 1px solid #999;
   height: 75px;
@@ -16,29 +10,48 @@
   margin-top: -1px;
   padding: 0;
   width: 75px;
+  position: relative;
 }
 
-.emptysquare {
-  background: #fff;
-  border: 1px solid #999;
-  height: 75px;
-  margin-right: -1px;
-  margin-top: -1px;
-  padding: 0;
-  width: 75px;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  justify-content: center;
-}
-
-.square:focus {
-  outline: none;
+.landscape {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 
 .hint {
-  height: 25px;
-  padding: 0;
-  width: 25px;
+  height: 33%;
+  width: 33%;
+  position: absolute;
+}
+
+.dir-north {
+  top: 0;
+  left: 33%;
+  background: #f00;
+}
+
+.dir-west {
+  top: 33%;
+  left: 0;
+  background: #0f0;
+  position: absolute;
+}
+
+.dir-east {
+  top: 33%;
+  left: 67%;
+  background: #00f;
+  position: absolute;
+}
+
+.dir-south {
+  top: 67%;
+  left: 33%;
+  background: #ff4;
+  position: absolute;
 }
 
 .kingdom {
