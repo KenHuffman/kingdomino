@@ -4,52 +4,72 @@ class Hint extends React.Component {
   }
 
   render() {
-    if (this.props.direction != null) {
-      return (
-        <div
-          className={'hint dir-' + this.props.direction}
-          onMouseEnter={() => this.props.onMouseEnter(this.props.direction)}
-          onMouseLeave={() => this.props.onMouseLeave(this.props.direction)}
-        />
-      )
-    } else {
-      return (
-        <div
-          className="hint"
-        />
-      )
-    }
+    return (
+      <div
+        className={'hint dir-' + this.props.direction}
+        onMouseEnter={() => this.props.onMouseEnter(this.props.direction)}
+        onMouseLeave={() => this.props.onMouseLeave(this.props.direction)}
+      />
+    );
   }
 }
 
 class Square extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      hintOverlay: null
+    };
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    this.handleMouseClick = this.handleMouseClick.bind(this);
+    this.setHintOverlay = this.setHintOverlay.bind(this);
   }
 
   handleMouseEnter(direction) {
-    this.props.onShowHint(this.props.row, this.props.column, direction)
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'hint')
   }
 
   handleMouseLeave(direction) {
-    this.props.onHideHint(this.props.row, this.props.column, direction)
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear')
+  }
+
+  handleMouseClick(direction) {
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'select')
+  }
+
+  setHintOverlay(landscapeSquare) {
+    this.setState({
+      hintOverlay: landscapeSquare
+    });
   }
 
   render() {
-    let img = "";
+    let landscape;
+    let crowns;
+    let castle;
     if (this.props.type == "landscape") {
-      img =
-        <img
-          className="landscape"
-          src={"images/" + this.props.landscape + "-" + this.props.crowns + ".jpg"}
-        />;
+      landscape = this.props.landscape;
+      crowns = this.props.crowns;
     } else if (this.props.type == "castle") {
+      castle = this.props.color;
+    } else if (this.state.hintOverlay != null) {
+      landscape = this.state.hintOverlay.landscape;
+      crowns = this.state.hintOverlay.crowns;
+    }
+
+    let img = "";
+    if (landscape) {
       img =
         <img
           className="landscape"
-          src={"images/castle-" + this.props.color + ".jpg"}
+          src={"images/" + landscape + "-" + crowns + ".jpg"}
+        />;
+    } else if (castle) {
+      img =
+        <img
+          className="landscape"
+          src={"images/castle-" + castle + ".jpg"}
         />;
     }
 
@@ -60,6 +80,7 @@ class Square extends React.Component {
         direction="north"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onClick={this.handleMouseClick}
       />);
     }
 
@@ -102,14 +123,10 @@ class Square extends React.Component {
 class Kingdom extends React.Component {
   constructor(props) {
     super(props);
-    this.handleShowHint = this.handleShowHint.bind(this);
-    this.handleHideHint = this.handleHideHint.bind(this);
+    this.handleLandscapeAction = this.handleLandscapeAction.bind(this);
   }
 
-  handleShowHint(row0, column0, direction) {
-    const square0 = this.props.placingTile.squares[0];
-    const square1 = this.props.placingTile.squares[1];
-
+  handleLandscapeAction(row0, column0, direction, action) {
     let row1 = row0;
     let column1 = column0;
     if (direction == "north") {
@@ -121,77 +138,83 @@ class Kingdom extends React.Component {
     } else {
       row1 = row0+1;
     }
-    console.log('handleShowHint (' + row0 + ',' + column0 + ') => ' + square0.landscape + ', (' + row1 + ',' + column1 + ') => ' + square1.landscape);
-  }
+    console.log('handleLandscapeAction ' + action + ', (' + row0 + ',' + column0 + '), (' + row1 + ',' + column1 + ')');
 
-  handleHideHint(row0, column0, direction) {
-    console.log('handleHideHint ' + row0 + ',' + column0 + ' ' + direction)
+    if (action == 'select') {
+      this.props.onTilePlacement(this.props.player, this.props.placingTile.rank,
+          row0, column0, row1, column1);
+      return;
+    }
+
+    const square0 = this.refs['r'+row0 + 'c'+column0];
+    const square1 = this.refs['r'+row1 + 'c'+column1];
+    if (action == 'clear') {
+      square0.setHintOverlay(null);
+      square1.setHintOverlay(null);
+    } else {
+      square0.setHintOverlay(this.props.placingTile.squares[0]);
+      square1.setHintOverlay(this.props.placingTile.squares[1]);
+    }
   }
 
   render() {
-    let row;
-    let column;
-    let squares = [];
-    for (row = 0; row < this.props.squares.length; row++) {
-      for (column = 0; column < this.props.squares[row].length; column++) {
-        let component;
-        const square = this.props.squares[row][column];
-        if (square == null) {
-          if (this.props.placingTile != null) {
-            const northhint = row > 0 && this.props.squares[row-1][column] == null;
-            const westhint = column > 0 && this.props.squares[row][column-1] == null;
-            const easthint = column+1 < this.props.squares.length && this.props.squares[row][column+1] == null;
-            const southhint = row+1 < this.props.squares.length && this.props.squares[row+1][column] == null;
-            component =
-              <Square
-                key={row + ',' + column}
-                type="empty"
-                row={row}
-                column={column}
-                placingTile={this.props.placingTile}
-                northhint={northhint}
-                westhint={westhint}
-                easthint={easthint}
-                southhint={southhint}
-                onShowHint={this.handleShowHint}
-                onHideHint={this.handleHideHint}
-              />;
-          } else {
-            component =
-              <Square
-                key={row + ',' + column}
-                type="empty"
-                row={row}
-                column={column}
-              />;
-          }
-        } else {
-          if (square.landscape != null) {
-            component =
-              <Square
-                key={row + ',' + column}
-                type="landscape"
-                landscape={square.landscape}
-                crowns={squares.crowns}
-              />;
-          } else {
-            component =
-              <Square
-                key={row + ',' + column}
-                type="castle"
-                color={this.props.playerColor}
-              />;
-          }
-        }
-        squares.push(component);
-      }
-    }
-    let label = this.props.playerName;
+    let label = this.props.player.name;
     if (this.props.placingTile) {
       label += ", should place the tile";
     }
 
-    // TODO: add shiftUp, shiftLeft, shiftDown, shiftRight
+    const dimension = this.props.squareDefs.length;
+    let squares = [];
+    for (let row = 0; row < dimension; row++) {
+      for (let column = 0; column < dimension; column++) {
+        let component;
+        const square = this.props.squareDefs[row][column];
+        if (square == null) {
+          let northhint = false;
+          let westhint = false;
+          let easthint = false;
+          let southhint = false;
+          if (this.props.placingTile) {
+            northhint = row > 0 && this.props.squareDefs[row-1][column] == null;
+            westhint = column > 0 && this.props.squareDefs[row][column-1] == null;
+            easthint = column+1 < dimension && this.props.squareDefs[row][column+1] == null;
+            southhint = row+1 < dimension && this.props.squareDefs[row+1][column] == null;
+          }
+
+          component =
+            <Square
+              key={row + ',' + column}
+              ref={'r' + row + 'c' + column}
+              type="empty"
+              row={row}
+              column={column}
+              northhint={northhint}
+              westhint={westhint}
+              easthint={easthint}
+              southhint={southhint}
+              onLandscapeAction={this.handleLandscapeAction}
+            />;
+        } else if (square.landscape != null) {
+          component =
+            <Square
+              key={row + ',' + column}
+              type="landscape"
+              landscape={square.landscape}
+              crowns={squares.crowns}
+            />;
+        } else {
+          component =
+            <Square
+              key={row + ',' + column}
+              type="castle"
+              color={this.props.player.colorName}
+            />;
+        }
+        squares.push(component);
+      }
+    }
+
+    // TODO: add shiftUp, shiftLeft, shiftDown, shiftRight buttons
     return (
       <div className="kingdom">
         <div>{label}</div>
@@ -333,11 +356,29 @@ class Game extends React.Component {
     );
   }
 
-  handleTilePlacement(row0, col0, row1, col1) {
+  handleTilePlacement(currentPlayer, rank, row0, column0, row1, column1) {
+    console.log('handleTilePlacement ' + rank + ' at ' + row0 + ',' + column0 + ', ' + row1 + ',' + column1);
+    fetch("placetile/" + ncodeURIComponent(currentPlayer.name) + "/" + rank +
+        row0 + "/" + column0 + "/" + row1 + "/" + column1, {
+      method: 'PUT'
+    })
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.refreshGame(result);
+      },
+      // Note: it's important to handle errors here
+      // instead of a catch() block so that we don't swallow
+      // exceptions from actual bugs in components.
+      (error) => {
+        this.setState({
+          error
+        });
+      }
+    );
   }
 
   render() {
-    const kingdoms = this.state.kingdoms;
     const currentTurn = this.state.currentTurn;
 
     let status;
@@ -361,14 +402,13 @@ class Game extends React.Component {
       status = "Initializing...";
     }
 
-    const kingdomContent = this.state.kingdoms.map((kingdom) =>
+    const kingdoms = this.state.kingdoms.map((kingdom) =>
       <Kingdom
         key={kingdom.player.name}
-        playerName={kingdom.player.name}
-        playerColor={kingdom.player.colorName}
+        player={kingdom.player}
+        squareDefs={kingdom.allSquares}
         placingTile={currentTurn != null && currentTurn.player.name == kingdom.player.name
-          ? placingTile : null}
-        squares={kingdom.allSquares}
+            ? placingTile : null}
         onTilePlacement={this.handleTilePlacement}
       />
     );
@@ -399,7 +439,7 @@ class Game extends React.Component {
     return (
       <div>
         <div>
-          {kingdomContent}
+          {kingdoms}
         </div>
         {thisRoundContent}
         {nextRoundContent}

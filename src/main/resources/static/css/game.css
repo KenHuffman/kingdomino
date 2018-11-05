@@ -30,27 +30,23 @@
 .dir-north {
   top: 0;
   left: 33%;
-  background: #f00;
 }
 
 .dir-west {
   top: 33%;
   left: 0;
-  background: #0f0;
   position: absolute;
 }
 
 .dir-east {
   top: 33%;
   left: 67%;
-  background: #00f;
   position: absolute;
 }
 
 .dir-south {
   top: 67%;
   left: 33%;
-  background: #ff4;
   position: absolute;
 }
 
