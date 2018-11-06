@@ -9,6 +9,7 @@ class Hint extends React.Component {
         className={'hint dir-' + this.props.direction}
         onMouseEnter={() => this.props.onMouseEnter(this.props.direction)}
         onMouseLeave={() => this.props.onMouseLeave(this.props.direction)}
+        onClick={() => this.props.onClick(this.props.direction)}
       />
     );
   }
@@ -22,7 +23,7 @@ class Square extends React.Component {
     };
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
-    this.handleMouseClick = this.handleMouseClick.bind(this);
+    this.handleClick = this.handleClick.bind(this);
     this.setHintOverlay = this.setHintOverlay.bind(this);
   }
 
@@ -34,7 +35,7 @@ class Square extends React.Component {
     this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear')
   }
 
-  handleMouseClick(direction) {
+  handleClick(direction) {
     this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'select')
   }
 
@@ -80,7 +81,7 @@ class Square extends React.Component {
         direction="north"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleMouseClick}
+        onClick={this.handleClick}
       />);
     }
 
@@ -90,6 +91,7 @@ class Square extends React.Component {
         direction="west"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onClick={this.handleClick}
       />);
     }
 
@@ -99,6 +101,7 @@ class Square extends React.Component {
         direction="east"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onClick={this.handleClick}
       />);
     }
 
@@ -108,6 +111,7 @@ class Square extends React.Component {
         direction="south"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onClick={this.handleClick}
       />);
     }
 
@@ -138,7 +142,6 @@ class Kingdom extends React.Component {
     } else {
       row1 = row0+1;
     }
-    console.log('handleLandscapeAction ' + action + ', (' + row0 + ',' + column0 + '), (' + row1 + ',' + column1 + ')');
 
     if (action == 'select') {
       this.props.onTilePlacement(this.props.player, this.props.placingTile.rank,
@@ -200,7 +203,7 @@ class Kingdom extends React.Component {
               key={row + ',' + column}
               type="landscape"
               landscape={square.landscape}
-              crowns={squares.crowns}
+              crowns={square.crowns}
             />;
         } else {
           component =
@@ -314,7 +317,8 @@ class Game extends React.Component {
       kingdoms: result.kingdoms,
       thisRoundTiles: result.thisRoundTiles,
       nextRoundTiles: result.nextRoundTiles,
-      currentTurn: result.currentTurn
+      currentTurn: result.currentTurn,
+      errorMessage: result.errorMessage
     });
   }
 
@@ -357,9 +361,8 @@ class Game extends React.Component {
   }
 
   handleTilePlacement(currentPlayer, rank, row0, column0, row1, column1) {
-    console.log('handleTilePlacement ' + rank + ' at ' + row0 + ',' + column0 + ', ' + row1 + ',' + column1);
-    fetch("placetile/" + ncodeURIComponent(currentPlayer.name) + "/" + rank +
-        row0 + "/" + column0 + "/" + row1 + "/" + column1, {
+    fetch("placetile/" + encodeURIComponent(currentPlayer.name) + "/" + rank +
+        "/" + row0 + "/" + column0 + "/" + row1 + "/" + column1, {
       method: 'PUT'
     })
     .then(res => res.json())
@@ -381,11 +384,18 @@ class Game extends React.Component {
   render() {
     const currentTurn = this.state.currentTurn;
 
+    let errorMessage = "";
+    if (this.state.errorMessage != null) {
+      errorMessage = (
+        <div>{this.state.errorMessage}</div>
+      );
+    }
     let status;
     let thisRoundSelector = null;
     let nextRoundSelector = null;
     let placingTile = null;
     if (currentTurn != null) {
+      // TODO: handle currentTurn.skipReason != null
       if (currentTurn.task == "GAME_OVER") {
         status = "Winner: " + currentTurn.player.name;
       } else {
@@ -438,6 +448,7 @@ class Game extends React.Component {
 
     return (
       <div>
+        {errorMessage}
         <div>
           {kingdoms}
         </div>

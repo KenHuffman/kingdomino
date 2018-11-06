@@ -78,6 +78,17 @@ public class Kingdom
     }
 
     /**
+     * Validates that the tile can actually be placed.
+     *
+     * @param tile
+     * @throws IllegalMoveException
+     */
+    public void validateTilePlaceable(Tile tile) throws IllegalMoveException
+    {
+        // TODO Implement
+    }
+
+    /**
      * Place a tile at two locations.
      *
      * @param tile the tile to place
@@ -104,7 +115,7 @@ public class Kingdom
         if (! isAdjacentMatch(location0, square0) &&
             ! isAdjacentMatch(location1, square1))
         {
-            throw new IllegalMoveException("The tile does not match kingdom");
+            throw new IllegalMoveException("Tile must be adjacent to castle or matching landscape");
         }
 
         squares[location0.getRow()][location0.getColumn()] = square0;
@@ -132,9 +143,9 @@ public class Kingdom
         int row = location.getRow();
         int column = location.getColumn();
         return (row > 0 && isMatchingLandscape(landscape, new Location(row-1, column))) ||
-               (row < squares.length && isMatchingLandscape(landscape, new Location(row+1, column))) ||
+               (row+1 < squares.length && isMatchingLandscape(landscape, new Location(row+1, column))) ||
                (column > 0 && isMatchingLandscape(landscape, new Location(row, column-1))) ||
-               (column < squares[row].length && isMatchingLandscape(landscape, new Location(row, column+1)));
+               (column+1 < squares[row].length && isMatchingLandscape(landscape, new Location(row, column+1)));
     }
 
     /**
