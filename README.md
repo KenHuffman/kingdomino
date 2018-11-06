@@ -1,9 +1,9 @@
 kingdomino
 ==========
 
-This program is a spring boot and react.js based implementation of the
-Kingdomino game. I'm implementing it to learn react.js. It is deployable as a war.
+This program is a react.js based implementation of the Kingdomino game.
+I'm implementing it to learn react.js. It is built as a war,
+but it can be executed as a standalone spring boot application.
 
-I believe the backend functionality is complete, but the front end is currently
-under initial development and most backend web services have yet to be called
-or debugged for that matter.
+I believe the backend functionality is near complete, but the front end needs
+some css adjustment to display things prettier.
