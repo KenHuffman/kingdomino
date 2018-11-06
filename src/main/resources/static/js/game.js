@@ -329,9 +329,6 @@ class Game extends React.Component {
         (result) => {
           this.refreshGame(result);
         },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
         (error) => {
           this.setState({
             error
@@ -349,9 +346,6 @@ class Game extends React.Component {
       (result) => {
         this.refreshGame(result);
       },
-      // Note: it's important to handle errors here
-      // instead of a catch() block so that we don't swallow
-      // exceptions from actual bugs in components.
       (error) => {
         this.setState({
           error
@@ -370,9 +364,23 @@ class Game extends React.Component {
       (result) => {
         this.refreshGame(result);
       },
-      // Note: it's important to handle errors here
-      // instead of a catch() block so that we don't swallow
-      // exceptions from actual bugs in components.
+      (error) => {
+        this.setState({
+          error
+        });
+      }
+    );
+  }
+
+  skipTilePlacement(currentPlayer, rank) {
+    fetch("skiptile/" + encodeURIComponent(currentPlayer.name) + "/" + rank, {
+      method: 'PUT'
+    })
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.refreshGame(result);
+      },
       (error) => {
         this.setState({
           error
@@ -390,22 +398,32 @@ class Game extends React.Component {
         <div>{this.state.errorMessage}</div>
       );
     }
+    let skipButton = "";
+
     let status;
     let thisRoundSelector = null;
     let nextRoundSelector = null;
     let placingTile = null;
     if (currentTurn != null) {
-      // TODO: handle currentTurn.skipReason != null
       if (currentTurn.task == "GAME_OVER") {
-        status = "Winner: " + currentTurn.player.name;
+        status = "Winner: " + currentTurn.player.name + ".";
       } else {
-        status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task;
+        status = "Next player: " + currentTurn.player.name + " to " + currentTurn.task + ".";
         if (currentTurn.task == "CHOOSING_INITIAL_TILE") {
           thisRoundSelector = currentTurn.player;
         } else if (currentTurn.task == "CHOOSING_NEXT_TILE") {
           nextRoundSelector = currentTurn.player;
         } else if (currentTurn.task == "PLACING_TILE") {
-          placingTile = this.state.thisRoundTiles[0];
+          if (currentTurn.skipReason != null) {
+            status += " " + currentTurn.skipReason;
+            skipButton = (
+              <button onClick={() => this.skipTilePlacement(this.state.currentTurn.player, this.state.thisRoundTiles[0].rank)}>
+                Skip Placement
+              </button>
+            );
+          } else {
+            placingTile = this.state.thisRoundTiles[0];
+          }
         }
       }
     } else {
@@ -456,6 +474,7 @@ class Game extends React.Component {
         {nextRoundContent}
         <div>
           {status}
+          {skipButton}
         </div>
       </div>
     );

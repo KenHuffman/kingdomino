@@ -78,14 +78,73 @@ public class Kingdom
     }
 
     /**
-     * Validates that the tile can actually be placed.
+     * Returns whether a tile can be placed anywhere on the board.
      *
-     * @param tile
-     * @throws IllegalMoveException
+     * @param tile the tile
+     * @return true if it could be played anywhere
      */
-    public void validateTilePlaceable(Tile tile) throws IllegalMoveException
+    public boolean isValidTilePlacementAnywhere(Tile tile)
     {
-        // TODO Implement
+        // try placing the tile in every horizontal spot
+        for (int row = 0; row < squares.length; ++row)
+        {
+            for (int column = 0; column < squares.length-1; ++column)
+            {
+                Location location0 = new Location(row, column);
+                Location location1 = new Location(row, column+1);
+                if (isValidTilePlacementInEitherOrientation(tile, location0, location1))
+                {
+                    return true;
+                }
+            }
+        }
+
+        // try placing the tile in every vertical spot
+        for (int row = 0; row < squares.length-1; ++row)
+        {
+            for (int column = 0; column < squares.length; ++column)
+            {
+                Location location0 = new Location(row, column);
+                Location location1 = new Location(row+1, column);
+                if (isValidTilePlacementInEitherOrientation(tile, location0, location1))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether a tile can be placed at particular location in either
+     * orientation.
+     *
+     * @param tile the tile to be placed
+     * @param location0 the location for the first square of the tile
+     * @param location1 the location for the second square of the tile
+     * @return true if it could be played in either orientation.
+     */
+    private boolean isValidTilePlacementInEitherOrientation(Tile tile, Location location0, Location location1)
+    {
+        try
+        {
+            validateTilePlacement(tile, location0, location1);
+            return true;
+        }
+        catch (IllegalMoveException ex)
+        {
+            try
+            {
+                validateTilePlacement(tile, location1, location0);
+                return true;
+            }
+            catch (IllegalMoveException ex2)
+            {
+                // both throw exceptions, neither direction is good
+                return false;
+            }
+        }
     }
 
     /**
@@ -99,6 +158,24 @@ public class Kingdom
     public void placeTile(Tile tile, Location location0, Location location1)
         throws IllegalMoveException
     {
+        validateTilePlacement(tile, location0, location1);
+
+        squares[location0.getRow()][location0.getColumn()] = tile.getSquare(0);
+        squares[location1.getRow()][location1.getColumn()] = tile.getSquare(1);
+    }
+
+    /**
+     * Validates that a tile can be placed at particular location in a
+     * particular orientation.
+     *
+     * @param tile the tile to be placed
+     * @param location0 the location for the first square of the tile
+     * @param location1 the location for the second square of the tile
+     * @throws IllegalMoveException if the tile cannot be placed there
+     */
+    private void validateTilePlacement(Tile tile, Location location0, Location location1)
+        throws IllegalMoveException
+    {
         if (! location0.isAdjacent(location1))
         {
             throw new IllegalMoveException("The locations specified are not adjacent");
@@ -109,17 +186,11 @@ public class Kingdom
             throw new IllegalMoveException("Both locations need to be empty to place a tile");
         }
 
-        LandscapeSquare square0 = tile.getSquare(0);
-        LandscapeSquare square1 = tile.getSquare(1);
-
-        if (! isAdjacentMatch(location0, square0) &&
-            ! isAdjacentMatch(location1, square1))
+        if (! isAdjacentMatch(location0, tile.getSquare(0)) &&
+            ! isAdjacentMatch(location1, tile.getSquare(1)))
         {
             throw new IllegalMoveException("Tile must be adjacent to castle or matching landscape");
         }
-
-        squares[location0.getRow()][location0.getColumn()] = square0;
-        squares[location1.getRow()][location1.getColumn()] = square1;
     }
 
     /**

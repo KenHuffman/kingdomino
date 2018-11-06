@@ -231,6 +231,51 @@ public class Game
     public void placeTile(String playerName, int rank, Location location0, Location location1)
         throws IllegalMoveException
     {
+        Tile tile = validatePlacingPlayer(playerName, rank);
+        Player player = tile.getOwner();
+        Kingdom kingdom = getKingdom(player);
+
+        kingdom.placeTile(tile, location0, location1);
+
+        // if the tile was properly placed (didn't throw), remove it from round
+        thisRoundTiles.removeTile(tile);
+        determineTurnAfterPlacement(player);
+    }
+
+    /**
+     * Skip placing an unplaceable tile by a player
+     *
+     * @param playerName the name of the player
+     * @param rank the tile to place
+     * @throws IllegalMoveException if the player cannot skip her turn
+     */
+    public void skipTile(String playerName, int rank)
+        throws IllegalMoveException
+    {
+        Tile tile = validatePlacingPlayer(playerName, rank);
+        Player player = tile.getOwner();
+        Kingdom kingdom = getKingdom(player);
+
+        if (kingdom.isValidTilePlacementAnywhere(tile))
+        {
+            throw new IllegalMoveException("Tile can be placed and turn cannot be skipped.");
+        }
+
+        thisRoundTiles.removeTile(tile);
+        determineTurnAfterPlacement(player);
+    }
+
+    /**
+     * Validate that it is time for player to place a tile.
+     *
+     * @param playerName the name of the player
+     * @param rank the rank of the tile to be placed, validate
+     * @return the tile matching the rank
+     * @throws IllegalMoveException if the player is going out of turn
+     */
+    private Tile validatePlacingPlayer(String playerName, int rank)
+        throws IllegalMoveException
+    {
         Player player = currentTurn.getPlayer();
         if (! player.getName().equals(playerName))
         {
@@ -242,8 +287,6 @@ public class Game
             throw new IllegalMoveException("It is not time to place a tile");
         }
 
-        Kingdom kingdom = getKingdom(player);
-
         Tile tile = thisRoundTiles.getNextTileToPlace(playerName);
         if (tile.getRank() != rank)
         {
@@ -251,10 +294,17 @@ public class Game
                 " is not the next tile to be placed.");
         }
 
-        kingdom.placeTile(tile, location0, location1);
-        // if the tile was properly placed (didn't throw), remove it from round
-        thisRoundTiles.removeTile(tile);
+        return tile;
+    }
 
+    /**
+     * Figure out whose turn it should be after a tile is placed.
+     *
+     * @param player the play who just placed a tile
+     * @throws IllegalMoveException if the game is in a bad state
+     */
+    private void determineTurnAfterPlacement(Player player) throws IllegalMoveException
+    {
         if (nextRoundTiles != null)
         {
             currentTurn = new CurrentTurn(player, Task.CHOOSING_NEXT_TILE);
@@ -329,8 +379,9 @@ public class Game
      *
      * @return the next player to place her tile, null if there are no
      *         unplaced tiles in this round.
+     * @throws IllegalMoveException if game is in a bad state
      */
-    private CurrentTurn getNextPlayerForTilePlacement()
+    private CurrentTurn getNextPlayerForTilePlacement() throws IllegalMoveException
     {
         Player nextPlayer = thisRoundTiles.getNextPlacingPlayer();
         if (nextPlayer == null)
@@ -340,15 +391,11 @@ public class Game
 
         CurrentTurn turn = new CurrentTurn(nextPlayer, Task.PLACING_TILE);
 
-        try
+        Kingdom kingdom = getKingdom(nextPlayer);
+        Tile tile = thisRoundTiles.getNextTileToPlace(nextPlayer.getName());
+        if (! kingdom.isValidTilePlacementAnywhere(tile))
         {
-            Kingdom kingdom = getKingdom(nextPlayer);
-            Tile tile = thisRoundTiles.getNextTileToPlace(nextPlayer.getName());
-            kingdom.validateTilePlaceable(tile);
-        }
-        catch (IllegalMoveException ex)
-        {
-            turn.setSkipReason(ex.getMessage());
+            turn.setSkipReason("Tile cannot be placed anywhere.");
         }
 
         return turn;

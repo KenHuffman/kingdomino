@@ -142,4 +142,29 @@ public class KingdominoController
             return ResponseEntity.badRequest().body(getGameResponse(ex.getMessage()));
         }
     }
+
+    /**
+     * Skip placing a claimed tile on a player's kingdom.
+     *
+     * @param playerName the name of the player placing the tile, must match
+     *        current player because we picky that way
+     * @param rank the rank on the back of the tile being place, must be one
+     *        previously claimed
+     * @return the game state, possibly with an error message if the tile was playable
+     */
+    @PutMapping("/skiptile/{playerName}/{rank}")
+    public ResponseEntity<?> handleSkipTile(
+        @PathVariable String playerName,
+        @PathVariable int rank)
+    {
+        try
+        {
+            game.skipTile(playerName, rank);
+            return ResponseEntity.ok(getGameResponse(null));
+        }
+        catch (IllegalMoveException ex)
+        {
+            return ResponseEntity.badRequest().body(getGameResponse(ex.getMessage()));
+        }
+    }
 }
