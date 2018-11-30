@@ -1,6 +1,8 @@
 /target/
-client/node_modules/
-client/dist/bundle.js
+node/
+node_modules/
+dist/bundle.js
+npm-debug.log
 !.mvn/wrapper/maven-wrapper.jar
 ### STS ###
 .apt_generated
