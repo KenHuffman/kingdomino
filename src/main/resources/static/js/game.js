@@ -1,3 +1,7 @@
+//import React from 'react';
+//import ReactDOM from 'react-dom';
+//import Button from '@material-ui/core/Button';
+
 class Hint extends React.Component {
   constructor(props) {
     super(props);
@@ -24,19 +28,26 @@ class Square extends React.Component {
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
     this.setHintOverlay = this.setHintOverlay.bind(this);
   }
 
   handleMouseEnter(direction) {
-    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'hint')
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'hint');
   }
 
   handleMouseLeave(direction) {
-    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear')
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear');
   }
 
   handleClick(direction) {
-    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'select')
+    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'select');
+  }
+
+  handleMouseMove(evt) {
+    console.log('clientXY=' + evt.clientX + ',' +evt.clientY +
+        ',targetOffsetLT=' + evt.target.offsetLeft + ',' + evt.target.offsetTop +
+        ',r=' + this.props.row + ',c=' + this.props.column);
   }
 
   setHintOverlay(landscapeSquare) {
@@ -115,8 +126,11 @@ class Square extends React.Component {
       />);
     }
 
+    hints = []; // TODO: remove hint code
+
     return (
-      <div className="square">
+      <div className="square"
+        onMouseMove={(e) => this.handleMouseMove(e)}>
         {img}
         {hints}
       </div>
@@ -238,10 +252,12 @@ class Tile extends React.Component {
     let ownerContent = "";
     if (this.props.tileOwner == null) {
       if (this.props.currentPlayer) {
-        ownerContent =
-          <button onClick={() => this.props.onTileSelection(this.props.currentPlayer, this.props.rank)}>
-            {this.props.currentPlayer.name}
-          </button>;
+        ownerContent = (
+          <button
+            onClick={() => this.props.onTileSelection(this.props.currentPlayer, this.props.rank)}>
+              {this.props.currentPlayer.name}
+          </button>
+        );
       } else {
         ownerContent = <span>unclaimed</span>;
       }
