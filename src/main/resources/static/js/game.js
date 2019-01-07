@@ -25,29 +25,47 @@ class Square extends React.Component {
     this.state = {
       hintOverlay: null
     };
-    this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.setHintOverlay = this.setHintOverlay.bind(this);
   }
 
-  handleMouseEnter(direction) {
-    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'hint');
-  }
-
-  handleMouseLeave(direction) {
-    this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear');
-  }
-
-  handleClick(direction) {
+  handleClick() {
     this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'select');
   }
 
   handleMouseMove(evt) {
-    console.log('clientXY=' + evt.clientX + ',' +evt.clientY +
-        ',targetOffsetLT=' + evt.target.offsetLeft + ',' + evt.target.offsetTop +
-        ',r=' + this.props.row + ',c=' + this.props.column);
+    if (this.props.placeable) {
+      let direction;
+      const doc = document.documentElement;
+      const windowLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+      const windowTop = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+      const posX = evt.clientX + windowLeft - evt.target.offsetLeft;
+      const posY = evt.clientY + windowTop - evt.target.offsetTop;
+      if (posX > posY) {
+        if (posY > evt.target.clientWidth - posX) {
+          direction = "west";
+        } else {
+          direction = "north";
+        }
+      } else {
+        if (posY > evt.target.clientWidth - posX) {
+          direction = "south";
+        } else {
+          direction = "east";
+        }
+      }
+
+      const placeable = this.props.placeable[direction];
+      console.log('eventXY=(' + evt.clientX + ',' + evt.clientY +
+        '),offsetXY=(' + evt.target.offsetLeft + ',' + evt.target.offsetTop +
+        '), windowXY=(' + windowLeft + ',' + windowTop +
+        '), posX=' + posX + ',posY=' + posY +
+        ', r=' + this.props.row + ',c=' + this.props.column +
+        ', direction=' + direction + ', placeable=' + placeable);
+    }
+    //this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'clear');
+    //this.props.onLandscapeAction(this.props.row, this.props.column, direction, 'hint');
   }
 
   setHintOverlay(landscapeSquare) {
@@ -85,54 +103,10 @@ class Square extends React.Component {
         />;
     }
 
-    let hints = [];
-    if (this.props.northhint) {
-      hints.push(<Hint
-        key="north"
-        direction="north"
-        onMouseEnter={this.handleMouseEnter}
-        onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleClick}
-      />);
-    }
-
-    if (this.props.westhint) {
-      hints.push(<Hint
-        key="west"
-        direction="west"
-        onMouseEnter={this.handleMouseEnter}
-        onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleClick}
-      />);
-    }
-
-    if (this.props.easthint) {
-      hints.push(<Hint
-        key="east"
-        direction="east"
-        onMouseEnter={this.handleMouseEnter}
-        onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleClick}
-      />);
-    }
-
-    if (this.props.southhint) {
-      hints.push(<Hint
-        key="south"
-        direction="south"
-        onMouseEnter={this.handleMouseEnter}
-        onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleClick}
-      />);
-    }
-
-    hints = []; // TODO: remove hint code
-
     return (
       <div className="square"
         onMouseMove={(e) => this.handleMouseMove(e)}>
         {img}
-        {hints}
       </div>
     );
   }
@@ -187,15 +161,17 @@ class Kingdom extends React.Component {
         let component;
         const square = this.props.squareDefs[row][column];
         if (square == null) {
-          let northhint = false;
-          let westhint = false;
-          let easthint = false;
-          let southhint = false;
+          let placeable = {
+            'north': false,
+            'west': false,
+            'east': false,
+            'south': false
+          };
           if (this.props.placingTile) {
-            northhint = row > 0 && this.props.squareDefs[row-1][column] == null;
-            westhint = column > 0 && this.props.squareDefs[row][column-1] == null;
-            easthint = column+1 < dimension && this.props.squareDefs[row][column+1] == null;
-            southhint = row+1 < dimension && this.props.squareDefs[row+1][column] == null;
+            placeable.north = row > 0 && this.props.squareDefs[row-1][column] == null;
+            placeable.west = column > 0 && this.props.squareDefs[row][column-1] == null;
+            placeable.east = column+1 < dimension && this.props.squareDefs[row][column+1] == null;
+            placeable.south = row+1 < dimension && this.props.squareDefs[row+1][column] == null;
           }
 
           component =
@@ -205,10 +181,7 @@ class Kingdom extends React.Component {
               type="empty"
               row={row}
               column={column}
-              northhint={northhint}
-              westhint={westhint}
-              easthint={easthint}
-              southhint={southhint}
+              placeable={placeable}
               onLandscapeAction={this.handleLandscapeAction}
             />;
         } else if (square.landscape != null) {
