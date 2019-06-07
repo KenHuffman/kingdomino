@@ -13,7 +13,7 @@ public class KingdomProperty
 
     public KingdomProperty(LandscapeSquare square, Location location)
     {
-        landscape = square.getLandscape().get();
+        landscape = square.getLandscape();
         addLocation(square, location);
     }
 
@@ -25,7 +25,7 @@ public class KingdomProperty
 
     public boolean addSquareIfPossible(LandscapeSquare square, Location location)
     {
-        if (square.getLandscape().get() == landscape)
+        if (square.getLandscape() == landscape)
         {
             for (Location l : locations)
             {

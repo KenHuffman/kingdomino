@@ -3,8 +3,6 @@ package com.huffmancoding.kingdomino;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.springframework.stereotype.Component;
-
 import com.huffmancoding.kingdomino.CurrentTurn.Task;
 
 /**
@@ -13,7 +11,6 @@ import com.huffmancoding.kingdomino.CurrentTurn.Task;
  *
  * @author Ken Huffman
  */
-@Component("game")
 public class Game
 {
     /** the size, in each direction, of each Kingdom. Usually 5. */

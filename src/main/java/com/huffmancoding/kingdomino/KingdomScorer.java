@@ -63,7 +63,7 @@ public class KingdomScorer
     private void addSquareToProperty(Location location)
     {
         Square square = kingdom.getSquare(location);
-        if (square == null || ! square.getLandscape().isPresent())
+        if (square == null || square.getLandscape() == null)
         {
             // empty squares and castles aren't part of properties
             return;

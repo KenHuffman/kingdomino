@@ -1,7 +1,5 @@
 package com.huffmancoding.kingdomino;
 
-import java.util.Optional;
-
 public class LandscapeSquare implements Square
 {
     private final Landscape landscape;
@@ -14,9 +12,9 @@ public class LandscapeSquare implements Square
     }
 
     @Override
-    public Optional<Landscape> getLandscape()
+    public Landscape getLandscape()
     {
-        return Optional.of(landscape);
+        return landscape;
     }
 
     public int getCrowns()

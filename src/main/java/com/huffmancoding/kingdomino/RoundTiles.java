@@ -113,7 +113,6 @@ public class RoundTiles
      * Get the tile that the player should place next.
      *
      * @param playerName the name of the player to play next, it is validated
-     * @param rank the tile to place next, it is validated
      * @return the tile of that rank
      * @throws IllegalMoveException if a player is going out of order
      */

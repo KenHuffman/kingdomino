@@ -1,22 +1,41 @@
 package com.huffmancoding.kingdomino;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.Resource;
 
-@SpringBootApplication
-public class KingdominoApplication extends SpringBootServletInitializer
+public class KingdominoApplication
 {
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
+    public static void main(String[] args) throws Exception
     {
-        return application.sources(KingdominoApplication.class);
-    }
+        Server server = new Server();
+        // HTTP connector
+        ServerConnector http = new ServerConnector(server);
+        http.setHost("localhost");
+        http.setPort(8080);
+        http.setIdleTimeout(30000);
 
-    public static void main(String[] args)
-    {
-        SpringApplication application = new SpringApplication(KingdominoApplication.class);
-        application.run(args);
+        // Set the connector
+        server.addConnector(http);
+
+        HandlerList handlers = new HandlerList();
+
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setBaseResource(Resource.newClassPathResource("static"));
+
+        Game game = new Game();
+        KingdominoHandler jsonHandler = new KingdominoHandler(game);
+
+        handlers.setHandlers(new Handler[] { resourceHandler, jsonHandler, new DefaultHandler() });
+        server.setHandler(handlers);
+
+        server.start();
+
+        System.out.println("Point your browser to: http://" + http.getHost() + ":" + http.getPort());
+        server.join();
     }
 }

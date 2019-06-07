@@ -1,7 +1,5 @@
 package com.huffmancoding.kingdomino;
 
-import java.util.Optional;
-
 /**
  * This class represents the kingdom grid with the square containing played
  * tiles.
@@ -210,7 +208,7 @@ public class Kingdom
         }
 
         // check north, south, west, and east for a matching square
-        Landscape landscape = square.getLandscape().get();
+        Landscape landscape = square.getLandscape();
         int row = location.getRow();
         int column = location.getColumn();
         return (row > 0 && isMatchingLandscape(landscape, new Location(row-1, column))) ||
@@ -235,9 +233,9 @@ public class Kingdom
             return false;
         }
 
-        Optional<Landscape> squareLandscape = square.getLandscape();
-        return ! squareLandscape.isPresent() /* castle */ ||
-                squareLandscape.get() == landscape; /* another tile */
+        Landscape squareLandscape = square.getLandscape();
+        return squareLandscape == null /* castle */ ||
+               squareLandscape == landscape; /* another tile */
     }
 
     /**
