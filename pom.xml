@@ -14,13 +14,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <jar-plugin.version>3.2.2</jar-plugin.version>
         <jetty.version>10.0.10</jetty.version>
         <shade.version>3.2.1</shade.version>
-        <com.fasterxml.jackson.version>2.13.2.1</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.version>2.14.0-rc1</com.fasterxml.jackson.version>
     </properties>
 
     <dependencies>
@@ -73,6 +70,15 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
             </plugin>
 
             <!-- this plugin creates the jar with a main class in the manifest. -->
